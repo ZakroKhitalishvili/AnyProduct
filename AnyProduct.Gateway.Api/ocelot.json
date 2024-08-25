@@ -1,0 +1,436 @@
+{
+  "GlobalConfiguration": {
+    "BaseUrl": "https://anyproduct.gateway.api"
+  },
+  "SwaggerEndPoints": [
+    {
+      "Key": "identity",
+      "Config": [
+        {
+          "Name": "Identity API",
+          "Version": "v1",
+          "Url": "http://anyproduct.identity.api:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "order",
+      "Config": [
+        {
+          "Name": "Orders API",
+          "Version": "v1",
+          "Url": "http://anyproduct.orders.api:8080/swagger/v1/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "product",
+      "Config": [
+        {
+          "Name": "Products API",
+          "Version": "v1",
+          "Url": "http://anyproduct.products.api:8080/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ],
+  "Routes": [
+    //======== Start: Identity ==========
+    {
+      "UpstreamPathTemplate": "/api/identity/register",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/Auth/register",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.identity.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "identity",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "2s",
+        "PeriodTimespan": 2,
+        "Limit": 20
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/identity/login",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/Auth/login",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.identity.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "identity",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "2s",
+        "PeriodTimespan": 2,
+        "Limit": 20
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/identity/refresh",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/Auth/refresh",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.identity.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "identity",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "2s",
+        "PeriodTimespan": 2,
+        "Limit": 20
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/identity/revoke",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/Auth/revoke",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.identity.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "identity",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      }
+    },
+    //======== End: Identity ==========
+    //======== Start: Product ==========
+    {
+      "UpstreamPathTemplate": "/api/product",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/product",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.products.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "product",
+      "DangerousAcceptAnyServerCertificateValidator": true
+    },
+    {
+      "UpstreamPathTemplate": "/api/product",
+      "UpstreamHttpMethod": [ "Post", "Put", "Delete" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/product",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.products.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "product",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "Role": "Administrator"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/product/{Id}",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/product/{Id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.products.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "product",
+      "DangerousAcceptAnyServerCertificateValidator": true
+    },
+    {
+      "UpstreamPathTemplate": "/api/product-category",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/product-category",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.products.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "product",
+      "DangerousAcceptAnyServerCertificateValidator": true
+    },
+    {
+      "UpstreamPathTemplate": "/api/product-category",
+      "UpstreamHttpMethod": [ "Post", "Put", "Delete" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/product-category",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.products.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "product",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "Role": "Administrator"
+      }
+    },
+    //======== End: Product ==========
+    //======== Start: Order ==========
+    {
+      "UpstreamPathTemplate": "/api/order/basket",
+      "UpstreamHttpMethod": [ "Post", "Delete", "Get" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/Basket",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.orders.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "order",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "Role": "User"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/order/{Id}",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/order/{Id}",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.orders.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "order",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "Role": "User"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/order/place",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/Order/PlaceOrder",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.orders.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "order",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "Role": "User"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/order/cancel",
+      "UpstreamHttpMethod": [ "Post" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/Order/CancelOrder",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.orders.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "order",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "Role": "User"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/orders",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/Order/OrderHistory",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.orders.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "order",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "Role": "Administrator"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/customer/orders",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/Order/CustomerOrderHistory",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.orders.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "order",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "Role": "User"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/payments",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/Order/PaymentHistory",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.orders.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "order",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "Role": "Administrator"
+      }
+    },
+    {
+      "UpstreamPathTemplate": "/api/customer/payments",
+      "UpstreamHttpMethod": [ "Get" ],
+      "DownstreamScheme": "https",
+      "DownstreamPathTemplate": "/api/Order/CustomerPaymentHistory",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "anyproduct.orders.api",
+          "Port": 8081
+        }
+      ],
+      "UpstreamHeaderTransform": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Allow-Anonymous": "true"
+      },
+      "SwaggerKey": "order",
+      "DangerousAcceptAnyServerCertificateValidator": true,
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RouteClaimsRequirement": {
+        "Role": "User"
+      }
+    }
+    //======== End: Order ==========
+  ]
+
+}

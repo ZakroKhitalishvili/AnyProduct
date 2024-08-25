@@ -1,0 +1,94 @@
+version: '3.4'
+
+services:
+  anyproduct.products.api:
+    image: ${DOCKER_REGISTRY-}anyproductproductsapi
+    depends_on:
+      - anyproduct.postgresql
+    volumes:
+      - ./.containers/productsapi/uploads:/app/UploadedFiles
+    build:
+      context: .
+      dockerfile: AnyProduct.Products.Api/Dockerfile
+
+  anyproduct.orders.api:
+    image: ${DOCKER_REGISTRY-}anyproductordersapi
+    depends_on:
+      - anyproduct.postgresql
+    build:
+      context: .
+      dockerfile: AnyProduct.Orders.Api/Dockerfile
+
+  anyproduct.postgresql:
+    image: postgres:latest
+    container_name: anyproduct.postgresql
+    ports:
+        - 7500:5432
+    volumes:
+        - ./.containers/products-db:/var/lib/postgresql/data
+    environment:
+        - POSTGRES_DB=ProductDb
+        - POSTGRES_PASSWORD=admin
+        - POSTGRES_USER=postgres
+
+  anyproduct.zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: anyproduct.zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
+  
+  anyproduct.kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: anyproduct.kafka
+    depends_on:
+      - anyproduct.zookeeper
+    ports:
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: anyproduct.zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://anyproduct.kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      AUTO_CREATE_TOPICS: 'true'
+
+
+  anyproduct.kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: anyproduct.kafka-ui
+    depends_on:
+      - anyproduct.kafka
+      - anyproduct.zookeeper
+    ports:
+      - 8080:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: anyproduct
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: anyproduct.kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: anyproduct.zookeeper:2181
+
+
+
+  anyproduct.identity.api:
+    image: ${DOCKER_REGISTRY-}anyproductidentityapi
+    depends_on:
+     - anyproduct.postgresql
+    build:
+      context: .
+      dockerfile: AnyProduct.Identity.Api/Dockerfile
+
+
+  anyproduct.gateway.api:
+    image: ${DOCKER_REGISTRY-}anyproductgatewayapi
+    depends_on:
+      - anyproduct.identity.api
+      - anyproduct.orders.api
+      - anyproduct.products.api
+    build:
+      context: .
+      dockerfile: AnyProduct.Gateway.Api/Dockerfile
+

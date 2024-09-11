@@ -8,9 +8,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Swashbuckle.AspNetCore.Filters;
+using System.Collections.Generic;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -23,10 +30,12 @@ builder.Services.AddSwaggerGen(options =>
     options.DocInclusionPredicate((docName, description) => true);
     options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
     {
-
         In = ParameterLocation.Header,
         Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
+        Type = SecuritySchemeType.Http,
+        Scheme = JwtBearerDefaults.AuthenticationScheme,
+        BearerFormat = "JWT",
+        Description = "Enter JWT token only"
     });
     options.OperationFilter<SecurityRequirementsOperationFilter>();
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -84,6 +93,33 @@ builder.Services
         };
     });
 
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("AnyProduct.Identity"))
+    .WithMetrics(metrics =>
+    {
+        metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation();
+
+        metrics.AddOtlpExporter();
+
+    })
+    .WithTracing(traces =>
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            traces.SetSampler(new AlwaysOnSampler());
+        }
+
+        traces
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddEntityFrameworkCoreInstrumentation();
+
+        traces.AddOtlpExporter();
+    });
+
+builder.Logging.AddOpenTelemetry(logging => logging.AddOtlpExporter());
 
 builder.Services.AddSingleton<ITokenService, TokenService>();
 

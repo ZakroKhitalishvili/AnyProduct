@@ -24,6 +24,12 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using AnyProduct.OutBox.EF;
 using AnyProduct.Inbox.EF;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using AnyProduct.Orders.Api.Middlewares;
+using OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,7 +46,10 @@ builder.Services.AddSwaggerGen(options =>
 
         In = ParameterLocation.Header,
         Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
+        Type = SecuritySchemeType.Http,
+        Scheme = JwtBearerDefaults.AuthenticationScheme,
+        BearerFormat = "JWT",
+        Description = "Enter JWT token only"
     });
     options.OperationFilter<SecurityRequirementsOperationFilter>();
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -91,6 +100,39 @@ builder.Services
         };
     });
 
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("AnyProduct.Orders"))
+    .WithMetrics(metrics =>
+    {
+        metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation();
+
+        metrics.AddOtlpExporter();
+
+    })
+    .WithTracing(traces =>
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            traces.SetSampler(new AlwaysOnSampler());
+        }
+
+        traces
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddEntityFrameworkCoreInstrumentation();
+
+        traces.AddOtlpExporter();
+    });
+
+builder.Logging.AddOpenTelemetry(logging =>
+{
+    logging.IncludeScopes = true;
+    logging.IncludeFormattedMessage = true;
+    logging.AddOtlpExporter();
+});
+
 builder.Services.AddDbContext<OrderContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddMediatR(cfg =>
@@ -130,6 +172,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 
 app.UseHttpsRedirection();
 

@@ -66,6 +66,9 @@ public partial class AuthController(
         if (user is null)
             return Unauthorized();
 
+        if (!await userManager.CheckPasswordAsync(user, loginDto.Password))
+            return Unauthorized();
+
         var roles = await userManager.GetRolesAsync(user);
 
         var claims = new List<Claim>

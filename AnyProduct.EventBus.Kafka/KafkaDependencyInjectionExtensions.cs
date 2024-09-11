@@ -3,6 +3,7 @@ using AnyProduct.EventBus.Kafka;
 using Confluent.Kafka;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using OpenTelemetry;
 namespace Microsoft.Extensions.Hosting;
 
 public static class KafkaDependencyInjectionExtensions
@@ -68,6 +69,15 @@ public static class KafkaDependencyInjectionExtensions
                 return new AdminClientBuilder(kafkaConfig).Build();
             }
         });
+
+        builder.Services.AddOpenTelemetry()
+           .WithTracing(tracing =>
+           {
+               tracing.AddSource(KafkaTelemetry.ActivitySourceName);
+           });
+
+
+        builder.Services.AddSingleton<KafkaTelemetry>();
 
         builder.Services.AddSingleton<IEventBus, KafkaEventBusProducer>();
         // Start consuming messages as soon as the application starts

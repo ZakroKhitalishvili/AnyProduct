@@ -22,6 +22,11 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.JsonWebTokens;
 using AnyProduct.OutBox.EF;
 using AnyProduct.Inbox.EF;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Logs;
+using AnyProduct.Products.Api.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,10 +41,12 @@ builder.Services.AddSwaggerGen(options =>
     options.DocInclusionPredicate((docName, description) => true);
     options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
     {
-
         In = ParameterLocation.Header,
         Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
+        Type = SecuritySchemeType.Http,
+        Scheme = JwtBearerDefaults.AuthenticationScheme,
+        BearerFormat = "JWT",
+        Description = "Enter JWT token only"
     });
     options.OperationFilter<SecurityRequirementsOperationFilter>();
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -89,6 +96,42 @@ builder.Services
         };
     });
 
+
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("AnyProduct.Products"))
+    .WithMetrics(metrics =>
+    {
+        metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation();
+
+        metrics.AddOtlpExporter();
+
+    })
+    .WithTracing(traces =>
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            traces.SetSampler(new AlwaysOnSampler());
+        }
+
+        traces
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddEntityFrameworkCoreInstrumentation();
+
+        traces.AddOtlpExporter();
+    });
+
+builder.Logging.AddOpenTelemetry(logging =>
+{
+    logging.IncludeScopes = true;
+    logging.IncludeFormattedMessage = true;
+    logging.AddOtlpExporter();
+});
+
+
 builder.Services.AddDbContext<ProductContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddMediatR(cfg =>
@@ -97,6 +140,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.AddOpenBehavior(typeof(ValidatorBehavior<,>));
     cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
 });
+
 
 builder.Services.AddSingleton<IFileService, LocalFileService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();

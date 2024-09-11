@@ -7,7 +7,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Diagnostics;
 using System.Text.Json;
+using OpenTelemetry.Context.Propagation;
+using OpenTelemetry;
+using System.Text;
+using System;
 namespace AnyProduct.EventBus.Kafka
 {
 
@@ -16,8 +21,12 @@ namespace AnyProduct.EventBus.Kafka
         IServiceScopeFactory serviceScopeFactory,
         IConsumer<string, string> consumer,
         IAdminClient adminClient,
-        IOptions<EventBusSubscriptionInfo> subscriptionOptions) : BackgroundService, IDisposable
+        IOptions<EventBusSubscriptionInfo> subscriptionOptions,
+        KafkaTelemetry kafkaTelemetry) : BackgroundService, IDisposable
     {
+        private readonly ActivitySource _activitySource = kafkaTelemetry.ActivitySource;
+        private readonly TextMapPropagator _propagator = kafkaTelemetry.Propagator;
+
         private readonly EventBusSubscriptionInfo _subscriptionInfo = subscriptionOptions.Value;
         public override void Dispose()
         {
@@ -60,8 +69,23 @@ namespace AnyProduct.EventBus.Kafka
 
                 var eventName = consumeResult.Topic;
                 var message = consumeResult.Message.Value;
+
+                // Extract the PropagationContext of the upstream parent from the message headers.
+                var parentContext = _propagator.Extract(default, consumeResult.Message, ExtractTraceContextFromMessage);
+                Baggage.Current = parentContext.Baggage;
+
+                // Start an activity with a name following the semantic convention of the OpenTelemetry messaging specification.
+                // https://github.com/open-telemetry/semantic-conventions/blob/main/docs/messaging/messaging-spans.md
+                var activityName = $"{eventName} receive";
+
+                using var activity = _activitySource.StartActivity(activityName, ActivityKind.Consumer, parentContext.ActivityContext);
+
+                activity.SetActivityContext(eventName, "receive");
+
                 try
                 {
+                    activity?.SetTag("message", message);
+
                     logger.LogInformation("Consuming a Kafka event: {@Topic} {@Message}", consumeResult.Topic, message);
 
                     if (message.Contains("Exception", StringComparison.InvariantCultureIgnoreCase))
@@ -78,6 +102,8 @@ namespace AnyProduct.EventBus.Kafka
                 catch (Exception ex)
                 {
                     logger.LogWarning(ex, "Error processing message \"{Message}\"", message);
+
+                    activity.SetExceptionTags(ex);
                 }
             }
         }
@@ -147,6 +173,17 @@ namespace AnyProduct.EventBus.Kafka
         {
             consumer.Unsubscribe();
             return Task.CompletedTask;
+        }
+
+
+        private IEnumerable<string> ExtractTraceContextFromMessage(Message<string, string> message, string key)
+        {
+            if (message.Headers.TryGetLastBytes(key, out var bytes))
+            {
+                var value = Encoding.UTF8.GetString(bytes);
+                return [value];
+            }
+            return [];
         }
     }
 

@@ -28,7 +28,6 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using AnyProduct.Orders.Api.Middlewares;
 using OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);

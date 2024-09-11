@@ -22,7 +22,7 @@ public class UnitOfWork : IUnitOfWork
     {
         if (IsActive) throw new Exception("Unit of work is already active");
 
-        _currentTransaction = await _context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+        _currentTransaction = await _context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
         return _currentTransaction.TransactionId.ToString();
     }

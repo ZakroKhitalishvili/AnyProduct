@@ -4,12 +4,13 @@ using AnyProduct.Products.Application.Dtos;
 using AnyProduct.Products.Domain.Repositories;
 using MediatR;
 using Microsoft.Extensions.Configuration;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Products.Application.Queries;
 
 public class GetProductsQuery : IRequest<PagedListDto<ProductDto>>
 {
-    public ICollection<Guid>? CategoryIds { get; set; }
+    public IReadOnlyCollection<Guid>? CategoryIds { get; set; }
 
     public int? Page { get; set; }
 
@@ -18,9 +19,9 @@ public class GetProductsQuery : IRequest<PagedListDto<ProductDto>>
 
 public class GetProductsQueryHander : IRequestHandler<GetProductsQuery, PagedListDto<ProductDto>>
 {
-    public readonly IProductRepository _productRepository;
-    public readonly IProductCategoryRepository _productCategoryRepository;
-    public readonly IConfiguration _configuration;
+    private readonly IProductRepository _productRepository;
+    private readonly IProductCategoryRepository _productCategoryRepository;
+    private readonly IConfiguration _configuration;
 
     public GetProductsQueryHander(IProductRepository productRepository, IProductCategoryRepository productCategoryRepository, IConfiguration configuration)
     {
@@ -29,27 +30,23 @@ public class GetProductsQueryHander : IRequestHandler<GetProductsQuery, PagedLis
         _configuration = configuration;
     }
 
-    public async Task<PagedListDto<ProductDto>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
+    public Task<PagedListDto<ProductDto>> Handle([NotNull] GetProductsQuery request, CancellationToken cancellationToken)
     {
         request.Page ??= 1;
         request.PageSize ??= 10;
 
-        var products = _productRepository.GetList(out int totalSize, request.CategoryIds, request.Page.Value, request.PageSize.Value);
+        var products = _productRepository.GetList(out int totalSize, request.CategoryIds as ICollection<Guid>, request.Page.Value, request.PageSize.Value);
 
 
-        var result = new PagedListDto<ProductDto>()
-        {
-            Items = new List<ProductDto>(),
-            Page = request.Page.Value,
-            PageSize = request.PageSize.Value,
-            Total = totalSize,
-        };
+
+
+        var items = new List<ProductDto>();
 
         foreach (var product in products)
         {
             var categories = _productCategoryRepository.FindManyById(product.ProductCategoryIds);
 
-            result.Items.Add(new ProductDto
+            items.Add(new ProductDto
             {
                 Id = product.AggregateId,
                 ImagePath = $"{_configuration["FileUpload:BaseUrl"]}/{product.Image}",
@@ -66,7 +63,15 @@ public class GetProductsQueryHander : IRequestHandler<GetProductsQuery, PagedLis
 
         }
 
+        var result = new PagedListDto<ProductDto>()
+        {
+            Items = items,
+            Page = request.Page.Value,
+            PageSize = request.PageSize.Value,
+            Total = totalSize,
+        };
 
-        return result;
+
+        return Task.FromResult(result);
     }
 }

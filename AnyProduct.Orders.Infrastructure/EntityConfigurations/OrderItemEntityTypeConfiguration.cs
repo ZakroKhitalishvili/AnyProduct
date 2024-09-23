@@ -1,18 +1,19 @@
 ﻿
-using AnyProduct.Orders.Domain.Entities.Order;
+using AnyProduct.Orders.Domain.Entities.OrderAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Infrastructure.EntityConfigurations;
 
 public class OrderItemEntityTypeConfiguration
     : IEntityTypeConfiguration<OrderItem>
 {
-    public void Configure(EntityTypeBuilder<OrderItem> orderItemConfiguration)
+    public void Configure([NotNull] EntityTypeBuilder<OrderItem> builder)
     {
-        orderItemConfiguration.ToTable("order_items");
+        builder.ToTable("order_items");
 
-        orderItemConfiguration.HasKey(b => b.Id);
+        builder.HasKey(b => b.Id);
 
     }
 }

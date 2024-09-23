@@ -76,6 +76,7 @@ builder.Services
     {
         o.RequireHttpsMetadata = false;
         o.SaveToken = true;
+#pragma warning disable CA5404 // Do not disable token validation checks
         o.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = false,
@@ -91,6 +92,7 @@ builder.Services
             },
 
         };
+#pragma warning restore CA5404 // Do not disable token validation checks
     });
 
 builder.Services.AddOpenTelemetry()
@@ -132,8 +134,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.MapIdentityApi<User>();
-
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -143,4 +143,6 @@ app.MapControllers();
 
 app.EnsureMigrations();
 
+#pragma warning disable S6966 // Awaitable method should be used
 app.Run();
+#pragma warning restore S6966 // Awaitable method should be used

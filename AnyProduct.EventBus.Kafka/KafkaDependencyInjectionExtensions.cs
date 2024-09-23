@@ -86,7 +86,7 @@ public static class KafkaDependencyInjectionExtensions
         return new EventBusBuilder(builder.Services);
     }
 
-    private class EventBusBuilder(IServiceCollection services) : IEventBusBuilder
+    private sealed class EventBusBuilder(IServiceCollection services) : IEventBusBuilder
     {
         public IServiceCollection Services => services;
     }

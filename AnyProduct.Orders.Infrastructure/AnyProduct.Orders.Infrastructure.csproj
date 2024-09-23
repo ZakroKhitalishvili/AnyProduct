@@ -1,21 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AnyProduct.Idempotency.EF\AnyProduct.Inbox.EF.csproj" />
-    <ProjectReference Include="..\AnyProduct.Outbox.EF\AnyProduct.Outbox.EF.csproj" />
-    <ProjectReference Include="..\AnyProduct.Orders.Application\AnyProduct.Orders.Application.csproj" />
-    <ProjectReference Include="..\AnyProduct.Orders.Domain\AnyProduct.Orders.Domain.csproj" />
-    <ProjectReference Include="..\AnyProduct.Outbox.EF\AnyProduct.Outbox.EF.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\AnyProduct.Inbox.EF\AnyProduct.Inbox.EF.csproj" />
+		<ProjectReference Include="..\AnyProduct.Outbox.EF\AnyProduct.Outbox.EF.csproj" />
+		<ProjectReference Include="..\AnyProduct.Orders.Application\AnyProduct.Orders.Application.csproj" />
+		<ProjectReference Include="..\AnyProduct.Orders.Domain\AnyProduct.Orders.Domain.csproj" />
+		<ProjectReference Include="..\AnyProduct.Outbox.EF\AnyProduct.Outbox.EF.csproj" />
+	</ItemGroup>
 
 </Project>

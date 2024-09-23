@@ -4,21 +4,22 @@ using AnyProduct.Products.Domain.Entities;
 using AnyProduct.Products.Domain.Repositories;
 using MediatR;
 using Microsoft.Extensions.Configuration;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Products.Application.Commands;
 
 public class CheckAndReserveProductStockCommand : IRequest<Unit>
 {
-    public Guid OrderId { get; set; }
-    public ICollection<OrderStockItem> OrderStockItems { get; set; }
+    public required Guid OrderId { get; set; }
+    public required IReadOnlyCollection<OrderStockItem> OrderStockItems { get; set; }
 
 }
 
 public class CheckAndReserveProductStockCommandHandler : IRequestHandler<CheckAndReserveProductStockCommand, Unit>
 {
-    public readonly IProductRepository _productRepository;
-    public readonly IIntegrationEventService _integrationEventService;
-    public readonly IConfiguration _configuration;
+    private readonly IProductRepository _productRepository;
+    private readonly IIntegrationEventService _integrationEventService;
+    private readonly IConfiguration _configuration;
 
     public CheckAndReserveProductStockCommandHandler(IProductRepository productRepository, IIntegrationEventService integrationEventService, IConfiguration configuration)
     {
@@ -27,7 +28,7 @@ public class CheckAndReserveProductStockCommandHandler : IRequestHandler<CheckAn
         _configuration = configuration;
     }
 
-    public async Task<Unit> Handle(CheckAndReserveProductStockCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle([NotNull] CheckAndReserveProductStockCommand request, CancellationToken cancellationToken)
     {
         var rejectedProducts = new List<Guid>();
 
@@ -49,7 +50,7 @@ public class CheckAndReserveProductStockCommandHandler : IRequestHandler<CheckAn
                 stockDetailedItems.Add(new OrderStockDetailedItem(
                     product.AggregateId,
                     product.Name,
-                    $"{_configuration["FileUpload:BaseUrl"]}/{product.Image}",
+                   new Uri($"{_configuration["FileUpload:BaseUrl"]}/{product.Image}"),
                    product.Price,
                    product.Amount
                     ));
@@ -58,7 +59,7 @@ public class CheckAndReserveProductStockCommandHandler : IRequestHandler<CheckAn
         }
 
 
-        if (rejectedProducts.Any())
+        if (rejectedProducts.Count != 0)
         {
             await _integrationEventService.AddEventAsync(new OrderStockRejectedIntergationEvent(request.OrderId, rejectedProducts, stockDetailedItems));
         }

@@ -1,22 +1,22 @@
 ﻿using AnyProduct.Products.Application.IntegrationEvents;
 using AnyProduct.Products.Application.IntegrationEvents.Models;
-using AnyProduct.Products.Domain.Entities;
 using AnyProduct.Products.Domain.Repositories;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Products.Application.Commands;
 
 public class RemoveReservationCommand : IRequest<Unit>
 {
-    public Guid OrderId { get; set; }
-    public ICollection<OrderStockItem> OrderStockItems { get; set; }
+    public required Guid OrderId { get; set; }
+    public required IReadOnlyCollection<OrderStockItem> OrderStockItems { get; set; }
 
 }
 
 public class RemoveReservationCommandHandler : IRequestHandler<RemoveReservationCommand, Unit>
 {
-    public readonly IProductRepository _productRepository;
-    public readonly IIntegrationEventService _integrationEventService;
+    private readonly IProductRepository _productRepository;
+    private readonly IIntegrationEventService _integrationEventService;
 
     public RemoveReservationCommandHandler(IProductRepository productRepository, IIntegrationEventService integrationEventService)
     {
@@ -24,9 +24,8 @@ public class RemoveReservationCommandHandler : IRequestHandler<RemoveReservation
         _integrationEventService = integrationEventService;
     }
 
-    public async Task<Unit> Handle(RemoveReservationCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle([NotNull] RemoveReservationCommand request, CancellationToken cancellationToken)
     {
-        var rejectedProducts = new List<Guid>();
 
         foreach (var stockItem in request.OrderStockItems)
         {
@@ -34,7 +33,7 @@ public class RemoveReservationCommandHandler : IRequestHandler<RemoveReservation
 
             if (product is null)
             {
-                throw new Exception("Product not found");
+                throw new InvalidOperationException("Product not found");
             }
             else
             {
@@ -43,7 +42,7 @@ public class RemoveReservationCommandHandler : IRequestHandler<RemoveReservation
             }
         }
 
-        // performa other operations relevant to shipment
+        // perform other operations relevant to a shipment
 
         await _integrationEventService.AddEventAsync(new OrderShippedIntergationEvent(request.OrderId));
 

@@ -7,6 +7,7 @@ using System.Data;
 using AnyProduct.OutBox.EF;
 using AnyProduct.Products.Application;
 using AnyProduct.Inbox.EF;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Products.Infrastructure;
 
@@ -22,7 +23,7 @@ public class ProductContext : DbContext
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating([NotNull] ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("products");
         modelBuilder.ApplyConfiguration(new ProductEntityTypeConfiguration());
@@ -41,8 +42,9 @@ public class ProductContext : DbContext
     protected async Task DispatchDomainEventsAsync()
     {
         var domainEntities = this.ChangeTracker
-        .Entries<AggregateRoot>()
-        .Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any());
+            .Entries<AggregateRoot>()
+            .Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Count != 0)
+            .ToList();
 
         var domainEvents = domainEntities
             .SelectMany(x => x.Entity.DomainEvents)

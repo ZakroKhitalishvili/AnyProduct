@@ -1,17 +1,17 @@
 ﻿using AnyProduct.Orders.Application.IntegrationEvents.Models;
 using AnyProduct.Orders.Application.Services;
-using AnyProduct.Orders.Domain.Entities.Balance;
-using AnyProduct.Orders.Domain.Entities.Order;
+using AnyProduct.Orders.Domain.Entities.PaymentAggregate;
 using AnyProduct.Orders.Domain.Repositories;
 using AnyProduct.Orders.Domain.Services;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Application.Commands.Order;
 
 public class ExecuteOrderCommand : IRequest<Unit>
 {
-    public Guid OrderId { get; set; }
-    public ICollection<OrderStockDetailedItem> OrderStockDetailedItems { get; internal set; }
+    public required Guid OrderId { get; set; }
+    public required ICollection<OrderStockDetailedItem> OrderStockDetailedItems { get; init; }
 }
 
 public class ExecuteOrderCommandHandler : IRequestHandler<ExecuteOrderCommand, Unit>
@@ -32,10 +32,10 @@ public class ExecuteOrderCommandHandler : IRequestHandler<ExecuteOrderCommand, U
         _buyerRepository = buyerRepository;
     }
 
-    public async Task<Unit> Handle(ExecuteOrderCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle([NotNull] ExecuteOrderCommand request, CancellationToken cancellationToken)
     {
         var order = await _orderRepository.FindByIdAsync(request.OrderId);
-        var buyer = await _buyerRepository.FindByCustomerIdAsync(order.BuyerId!);
+        var buyer = await _buyerRepository.FindByCustomerIdAsync(order!.BuyerId!);
 
         foreach (var item in request.OrderStockDetailedItems)
         {
@@ -47,7 +47,7 @@ public class ExecuteOrderCommandHandler : IRequestHandler<ExecuteOrderCommand, U
         try
         {
 
-            var paymentMethod = buyer.PaymentMethods.Single(x => x.Id.ToString() == order.PaymentMethodId);
+            var paymentMethod = buyer!.PaymentMethods.Single(x => x.Id.ToString() == order.PaymentMethodId);
 
             requestId = await _paymentGatewayService.CreateRequest(order, paymentMethod, null);
 
@@ -62,7 +62,7 @@ public class ExecuteOrderCommandHandler : IRequestHandler<ExecuteOrderCommand, U
             await _paymentGatewayService.Execute(requestId);
 
         }
-        catch (Exception ex)
+        catch
         {
             if (requestId is not null)
             {

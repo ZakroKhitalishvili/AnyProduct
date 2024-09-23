@@ -1,25 +1,26 @@
-﻿using AnyProduct.Orders.Domain.Entities.Order;
+﻿using AnyProduct.Orders.Domain.Entities.OrderAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Infrastructure.EntityConfigurations;
 
 public class OrderEntityTypeConfiguration
     : IEntityTypeConfiguration<Order>
 {
-    public void Configure(EntityTypeBuilder<Order> orderConfiguration)
+    public void Configure([NotNull] EntityTypeBuilder<Order> builder)
     {
-        orderConfiguration.ToTable("orders");
+        builder.ToTable("orders");
 
-        orderConfiguration.Ignore(b => b.DomainEvents);
+        builder.Ignore(b => b.DomainEvents);
 
-        orderConfiguration.OwnsOne(b => b.Address);
+        builder.OwnsOne(b => b.Address);
 
-        orderConfiguration.HasKey(b => b.AggregateId);
+        builder.HasKey(b => b.AggregateId);
 
-        orderConfiguration.HasMany(b => b.OrderItems).WithOne();
+        builder.HasMany(b => b.OrderItems).WithOne();
 
-        orderConfiguration.HasIndex(b => b.AggregateId)
+        builder.HasIndex(b => b.AggregateId)
             .IsUnique(true);
     }
 }

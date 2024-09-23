@@ -2,13 +2,14 @@
 using AnyProduct.Products.Domain.Repositories;
 using AnyProduct.Products.Domain.Services;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Products.Application.Commands;
 
 public class UpdateProductCategoryCommand : IRequest<Unit>
 {
-    public Guid Id { get; set; }
-    public string Name { get; set; }
+    public required Guid Id { get; set; }
+    public required string Name { get; set; }
 
 }
 
@@ -23,30 +24,30 @@ public class UpdateProductCategoryCommandHandler : IRequestHandler<UpdateProduct
         _dateTimeProvider = dateTimeProvider;
     }
 
-    public async Task<Unit> Handle(UpdateProductCategoryCommand request, CancellationToken cancellationToken)
+    public Task<Unit> Handle([NotNull] UpdateProductCategoryCommand request, CancellationToken cancellationToken)
     {
         var productCategory = _productCategoryRepository.FindById(request.Id);
 
         if (productCategory is null)
         {
-            throw new Exception("Category not found");
+            throw new InvalidOperationException("Category not found");
         }
 
         if (productCategory.Name == request.Name)
         {
-            throw new Exception("Category's name is not different");
+            throw new InvalidOperationException("Category's name is not different");
         }
 
         if (_productCategoryRepository.ExistName(request.Name))
         {
-            throw new Exception("Name is already used");
+            throw new InvalidOperationException("Name is already used");
         }
 
         productCategory.Update(request.Name, _dateTimeProvider.Now);
 
         _productCategoryRepository.Update(productCategory);
 
-        return Unit.Value;
+        return Task.FromResult(Unit.Value);
     }
 
 }

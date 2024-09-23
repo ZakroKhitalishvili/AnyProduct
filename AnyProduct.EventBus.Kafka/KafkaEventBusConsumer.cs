@@ -13,6 +13,7 @@ using OpenTelemetry.Context.Propagation;
 using OpenTelemetry;
 using System.Text;
 using System;
+using AnyProduct.EventBus.Kafka.Extensions;
 namespace AnyProduct.EventBus.Kafka
 {
 
@@ -22,14 +23,18 @@ namespace AnyProduct.EventBus.Kafka
         IConsumer<string, string> consumer,
         IAdminClient adminClient,
         IOptions<EventBusSubscriptionInfo> subscriptionOptions,
-        KafkaTelemetry kafkaTelemetry) : BackgroundService, IDisposable
+        KafkaTelemetry kafkaTelemetry) : BackgroundService
     {
+#pragma warning disable CA2213 // Disposable fields should be disposed
         private readonly ActivitySource _activitySource = kafkaTelemetry.ActivitySource;
+#pragma warning restore CA2213 // Disposable fields should be disposed
         private readonly TextMapPropagator _propagator = kafkaTelemetry.Propagator;
 
         private readonly EventBusSubscriptionInfo _subscriptionInfo = subscriptionOptions.Value;
+
         public override void Dispose()
         {
+            base.Dispose();
             consumer?.Dispose();
         }
 
@@ -80,7 +85,7 @@ namespace AnyProduct.EventBus.Kafka
 
                 using var activity = _activitySource.StartActivity(activityName, ActivityKind.Consumer, parentContext.ActivityContext);
 
-                activity.SetActivityContext(eventName, "receive");
+                activity!.SetActivityContext(eventName, "receive");
 
                 try
                 {
@@ -103,7 +108,7 @@ namespace AnyProduct.EventBus.Kafka
                 {
                     logger.LogWarning(ex, "Error processing message \"{Message}\"", message);
 
-                    activity.SetExceptionTags(ex);
+                    activity!.SetExceptionTags(ex);
                 }
             }
         }
@@ -136,22 +141,21 @@ namespace AnyProduct.EventBus.Kafka
             foreach (var handler in scope.ServiceProvider.GetKeyedServices<IIntegrationEventHandler>(eventType))
             {
                 string handlerName = handler.GetType().FullName!;
-                bool isConsumable = await inboxService.TryProcessAsync(integrationEvent, handlerName);
+                bool isConsumable = await inboxService.TryProcessAsync(integrationEvent!, handlerName);
 
                 if (isConsumable)
                 {
                     try
                     {
-                        await handler.Handle(integrationEvent);
-                        await inboxService.SucceedAsync(integrationEvent.Id, handlerName);
-                        consumed = consumed && true;
+                        await handler.Handle(integrationEvent!);
+                        await inboxService.SucceedAsync(integrationEvent!.Id, handlerName);
                     }
                     catch (Exception ex)
                     {
 
                         consumed = false;
                         logger.LogError(ex, "Failed to consume {@Event}", integrationEvent);
-                        await inboxService.FailAsync(integrationEvent.Id, handlerName);
+                        await inboxService.FailAsync(integrationEvent!.Id, handlerName);
                     }
                 }
                 else
@@ -164,7 +168,7 @@ namespace AnyProduct.EventBus.Kafka
 
         }
 
-        private IntegrationEvent DeserializeMessage(string message, Type eventType)
+        private static IntegrationEvent? DeserializeMessage(string message, Type eventType)
         {
             return JsonSerializer.Deserialize(message, eventType) as IntegrationEvent;
         }
@@ -175,8 +179,7 @@ namespace AnyProduct.EventBus.Kafka
             return Task.CompletedTask;
         }
 
-
-        private IEnumerable<string> ExtractTraceContextFromMessage(Message<string, string> message, string key)
+        private static IEnumerable<string> ExtractTraceContextFromMessage(Message<string, string> message, string key)
         {
             if (message.Headers.TryGetLastBytes(key, out var bytes))
             {

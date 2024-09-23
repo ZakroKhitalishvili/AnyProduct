@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AnyProduct.Orders.Domain.Entities.Order;
+namespace AnyProduct.Orders.Domain.Entities.OrderAggregate;
 
 public class OrderItem
 {
@@ -18,11 +18,11 @@ public class OrderItem
 
     protected OrderItem() { }
 
-    public OrderItem(Guid productId, string productName, decimal unitPrice, string imageUrl, int units = 1)
+    public OrderItem(Guid productId, string productName, decimal unitPrice, Uri? imageUrl, int units = 1)
     {
         if (units <= 0)
         {
-            throw new Exception("Invalid number of units");
+            throw new InvalidOperationException("Invalid number of units");
         }
 
 
@@ -30,13 +30,13 @@ public class OrderItem
         ProductName = productName;
         UnitPrice = unitPrice;
         Units = units;
-        ImageUrl = imageUrl;
+        ImageUrl = imageUrl?.OriginalString;
     }
     public OrderItem(Guid productId, int units = 1)
     {
         if (units <= 0)
         {
-            throw new Exception("Invalid number of units");
+            throw new InvalidOperationException("Invalid number of units");
         }
 
 
@@ -48,16 +48,16 @@ public class OrderItem
     {
         if (units < 0)
         {
-            throw new Exception("Invalid units");
+            throw new InvalidOperationException("Invalid units");
         }
 
         Units += units;
     }
 
-    public void SetStockDetails(string productName, string  imageUrl, decimal unitPrice)
+    public void SetStockDetails(string productName, Uri? imageUrl, decimal unitPrice)
     {
         ProductName = productName;
-        ImageUrl = imageUrl;
+        ImageUrl = imageUrl?.OriginalString;
         UnitPrice = unitPrice;
     }
 }

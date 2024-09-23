@@ -1,4 +1,4 @@
-﻿using AnyProduct.Orders.Domain.Entities.Balance;
+﻿using AnyProduct.Orders.Domain.Entities.PaymentAggregate;
 using AnyProduct.Orders.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,7 +28,7 @@ public class PaymentRepository : IPaymentRepository
         _context.Entry(payment).State = EntityState.Modified;
     }
 
-    public ICollection<Payment> GetList(out int totalSize, string customerId, int page = 1, int pageSize = 10)
+    public ICollection<Payment> GetList(out int totalSize, string? customerId, int page = 1, int pageSize = 10)
     {
         var query = _context.Payments.AsNoTracking();
 

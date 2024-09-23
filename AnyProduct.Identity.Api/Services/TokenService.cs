@@ -38,6 +38,7 @@ public class TokenService(IConfiguration configuration) : ITokenService
 
     public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
     {
+#pragma warning disable CA5404 // Do not disable token validation checks
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = false, //you might want to validate the audience and issuer depending on your use case
@@ -46,12 +47,13 @@ public class TokenService(IConfiguration configuration) : ITokenService
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!.ToString())),
             ValidateLifetime = false //here we are saying that we don't care about the token's expiration date
         };
+#pragma warning restore CA5404 // Do not disable token validation checks
 
         var tokenHandler = new JwtSecurityTokenHandler();
         SecurityToken securityToken;
         var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
         var jwtSecurityToken = securityToken as JwtSecurityToken;
-        if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+        if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.OrdinalIgnoreCase))
             throw new SecurityTokenException("Invalid token");
 
         return principal;

@@ -3,12 +3,14 @@ using AnyProduct.Identity.Api.Data;
 using AnyProduct.Identity.Api.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Identity.Api.Extensions;
 
 public static class WebApplicationExtensions
 {
-    public static void EnsureMigrations(this WebApplication app)
+    public static void EnsureMigrations([NotNull] this WebApplication app)
     {
         using (var scope = app.Services.CreateScope())
         {
@@ -42,9 +44,9 @@ public static class WebApplicationExtensions
 
                         var roleResult = userManager.AddToRoleAsync(admin, "Administrator").Result;
 
-                        if (!(createResult.Succeeded && createResult.Succeeded))
+                        if (!(createResult.Succeeded && roleResult.Succeeded))
                         {
-                            throw new Exception("Failed to add a default admin");
+                            throw new InvalidOperationException("Failed to add a default admin");
                         }
 
                     }
@@ -53,13 +55,11 @@ public static class WebApplicationExtensions
                 }
 
             }
-            catch (Exception ex)
+            catch (DbException ex)
             {
                 var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
                 logger.LogError(ex, "An error occurred while migrating or seeding the database.");
-
-                throw;
             }
         }
     }

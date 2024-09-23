@@ -1,6 +1,6 @@
 ﻿
 
-using AnyProduct.Orders.Domain.Entities.Order;
+using AnyProduct.Orders.Domain.Entities.OrderAggregate;
 using System.ComponentModel.DataAnnotations;
 
 namespace AnyProduct.Orders.Application.Dtos;
@@ -11,16 +11,18 @@ public class OrderDto
 
     public DateTime OrderDate { get; set; }
 
-    public ShippingAddressDto Address { get; set; }
+    public required ShippingAddressDto Address { get; set; }
 
     public OrderStatus OrderStatus { get; set; }
 
-    public string Description { get; set; }
+    public required string Description { get; set; }
 
-    public ICollection<OrderItemDTO> OrderItems { get; set; }
+    public required IReadOnlyCollection<OrderItemDto> OrderItems { get; set; }
 
     public static OrderDto From(Order order)
     {
+        ArgumentNullException.ThrowIfNull(order);
+
         return new OrderDto
         {
             Id = order.AggregateId,
@@ -36,7 +38,7 @@ public class OrderDto
             OrderDate = order.OrderDate,
             OrderStatus = order.OrderStatus,
             OrderItems = order.OrderItems.Select(x =>
-            new OrderItemDTO
+            new OrderItemDto
             {
                 ImageUrl = x.ImageUrl,
                 ProductId = x.ProductId,

@@ -13,6 +13,8 @@ public class ProductCategory : AggregateRoot
 
     public DateTime? UpdateDate { get; private set; }
 
+    protected ProductCategory() { }
+
     public ProductCategory(string name, DateTime createDate)
     {
         Name = name;

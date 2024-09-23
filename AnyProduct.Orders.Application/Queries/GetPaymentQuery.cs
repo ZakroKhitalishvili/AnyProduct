@@ -1,8 +1,9 @@
 ﻿
 using AnyProduct.Orders.Application.Dtos;
-using AnyProduct.Orders.Domain.Entities.Balance;
+using AnyProduct.Orders.Domain.Entities.PaymentAggregate;
 using AnyProduct.Orders.Domain.Repositories;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Application.Queries;
 
@@ -15,14 +16,14 @@ public class GetPaymentQuery : IRequest<PagedListDto<PaymentDto>>
 
 public class GetPaymentQueryHandler : IRequestHandler<GetPaymentQuery, PagedListDto<PaymentDto>>
 {
-    public readonly IPaymentRepository _paymentRepository;
+    private readonly IPaymentRepository _paymentRepository;
 
     public GetPaymentQueryHandler(IPaymentRepository paymentRepository)
     {
         _paymentRepository = paymentRepository;
     }
 
-    public async Task<PagedListDto<PaymentDto>> Handle(GetPaymentQuery request, CancellationToken cancellationToken)
+    public Task<PagedListDto<PaymentDto>> Handle([NotNull] GetPaymentQuery request, CancellationToken cancellationToken)
     {
         request.Page ??= 1;
         request.PageSize ??= 10;
@@ -50,6 +51,6 @@ public class GetPaymentQueryHandler : IRequestHandler<GetPaymentQuery, PagedList
         }
 
 
-        return result;
+        return Task.FromResult(result);
     }
 }

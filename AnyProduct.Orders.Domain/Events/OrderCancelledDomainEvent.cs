@@ -1,4 +1,4 @@
-﻿using AnyProduct.Orders.Domain.Entities.Order;
+﻿using AnyProduct.Orders.Domain.Entities.OrderAggregate;
 
 
 namespace AnyProduct.Orders.Domain.Events;

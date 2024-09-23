@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -9,7 +10,7 @@ namespace AnyProduct.Products.Infrastructure.Migrations
     public partial class Added_InboxEventLogs : Migration
     {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
+        protected override void Up([NotNull] MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
                 name: "InboxEventLogEntry",
@@ -32,7 +33,7 @@ namespace AnyProduct.Products.Infrastructure.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
+        protected override void Down([NotNull] MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "InboxEventLogEntry",

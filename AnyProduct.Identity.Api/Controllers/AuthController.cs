@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 namespace AnyProduct.Identity.Api.Controllers;
@@ -17,17 +18,13 @@ namespace AnyProduct.Identity.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public partial class AuthController(
-    SignInManager<User> signInManager,
     UserManager<User> userManager,
-    RoleManager<IdentityRole> roleManager,
     ITokenService tokenService,
-    IdentityContext context,
-    IConfiguration configuration) : ControllerBase
+    IdentityContext context) : ControllerBase
 {
 
-
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterDto registerDto)
+    public async Task<IActionResult> Register([NotNull] RegisterDto registerDto)
     {
         var user = new User
         {
@@ -35,8 +32,6 @@ public partial class AuthController(
             Email = registerDto.Email,
             UserName = registerDto.Email,
             PersonalNumber = registerDto.PersonalNumber,
-
-
         };
 
         var result = await userManager.CreateAsync(user, registerDto.Password);
@@ -73,10 +68,10 @@ public partial class AuthController(
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, user.Email!),
-            new Claim(ClaimTypes.GivenName, user.FullName),
-            new Claim("Role", string.Join(",",roles)),
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id)
+            new (ClaimTypes.Name, user.Email!),
+            new (ClaimTypes.GivenName, user.FullName),
+            new ("Role", string.Join(",",roles)),
+            new (JwtRegisteredClaimNames.Sub, user.Id)
         };
         var accessToken = tokenService.GenerateAccessToken(claims);
         var refreshToken = tokenService.GenerateRefreshToken();
@@ -85,7 +80,7 @@ public partial class AuthController(
         {
             Id = Guid.NewGuid(),
             Active = true,
-            Device = Request.Headers["User-Agent"],
+            Device = Request.Headers.UserAgent.ToString(),
             Expiration = DateTime.UtcNow.AddDays(10),
             Token = refreshToken,
             UserId = user.Id,
@@ -93,7 +88,7 @@ public partial class AuthController(
 
         context.RefreshTokens.Add(refreshTokenEntry);
 
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return Ok(new AuthenticatedResponse
         {
@@ -113,8 +108,21 @@ public partial class AuthController(
         string accessToken = refreshTokenDto.Token;
         string refreshToken = refreshTokenDto.RefreshToken;
         var principal = tokenService.GetPrincipalFromExpiredToken(accessToken);
-        var username = principal.Identity.Name; //this is mapped to the Name claim by default
-        var user = await userManager.FindByEmailAsync(username);
+
+        if (principal is null)
+        {
+            return BadRequest("Invalid token");
+        }
+
+        var username = principal.Identity!.Name; //this is mapped to the Name claim by default
+
+        var user = await userManager.FindByEmailAsync(username!);
+
+        if (user is null)
+        {
+            return BadRequest("Invalid token");
+        }
+
         var roles = await userManager.GetRolesAsync(user);
 
         var claims = new List<Claim>
@@ -127,13 +135,13 @@ public partial class AuthController(
 
         var refreshTokenEntry = context.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 
-        if (user is null || refreshTokenEntry is null || !refreshTokenEntry.Active || refreshTokenEntry.Expiration <= DateTime.Now)
+        if (refreshTokenEntry is null || !refreshTokenEntry.Active || refreshTokenEntry.Expiration <= DateTime.Now)
             return BadRequest("Invalid client request");
 
         var newAccessToken = tokenService.GenerateAccessToken(claims);
 
+        await context.SaveChangesAsync();
 
-        context.SaveChanges();
         return Ok(new AuthenticatedResponse()
         {
             Token = newAccessToken,
@@ -145,7 +153,7 @@ public partial class AuthController(
     [Route("revoke")]
     public async Task<IActionResult> Revoke(RevokeDto revokeDto)
     {
-        var username = User.Identity.Name;
+        var username = User.Identity!.Name!;
         var user = await userManager.FindByEmailAsync(username);
         var refreshTokenEntry = context.RefreshTokens.SingleOrDefault(x => x.Token == revokeDto.RefreshToken);
 
@@ -154,7 +162,7 @@ public partial class AuthController(
         refreshTokenEntry.Active = false;
         context.Entry(refreshTokenEntry).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
 
-        context.SaveChanges();
+        await context.SaveChangesAsync();
 
         return NoContent();
     }

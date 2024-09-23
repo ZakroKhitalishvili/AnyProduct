@@ -6,9 +6,9 @@ namespace AnyProduct.Products.Application.IntegrationEvents;
 
 public class OrderStartedIntegrationEvent : IntegrationEvent
 {
-    public string UserId { get; init; }
+    public required string UserId { get; init; }
 
-    public Guid OrderId { get; init; }
+    public required Guid OrderId { get; init; }
 
-    public ICollection<OrderStockItem> OrderStockItems { get; init; }
+    public required IReadOnlyCollection<OrderStockItem> OrderStockItems { get; init; }
 }

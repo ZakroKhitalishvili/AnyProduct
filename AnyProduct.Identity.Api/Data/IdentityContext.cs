@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Identity.Api.Data;
 
@@ -14,7 +15,7 @@ public class IdentityContext : IdentityDbContext<User>
 
     }
 
-    protected override void OnModelCreating(ModelBuilder builder)
+    protected override void OnModelCreating([NotNull] ModelBuilder builder)
     {
 
         base.OnModelCreating(builder);

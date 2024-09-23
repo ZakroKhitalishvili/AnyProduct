@@ -1,7 +1,6 @@
 ﻿
-using AnyProduct.Orders.Application.Dtos;
+using AnyProduct.Orders.Application.Dtos.Basket;
 using AnyProduct.Orders.Application.Services;
-using AnyProduct.Orders.Domain.Entities.Basket;
 using AnyProduct.Orders.Domain.Repositories;
 using MediatR;
 
@@ -13,8 +12,8 @@ public class GetBasketQuery : IRequest<ICollection<BasketItemDto>>
 
 public class GetBasketQueryHandler : IRequestHandler<GetBasketQuery, ICollection<BasketItemDto>>
 {
-    public readonly IBasketRepository _basketRepository;
-    public readonly ICurrentUserProvider _currentUserProvider;
+    private readonly IBasketRepository _basketRepository;
+    private readonly ICurrentUserProvider _currentUserProvider;
 
     public GetBasketQueryHandler(IBasketRepository basketRepository, ICurrentUserProvider currentUserProvider)
     {

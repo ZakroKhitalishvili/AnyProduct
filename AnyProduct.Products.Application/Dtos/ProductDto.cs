@@ -5,7 +5,7 @@ public class ProductDto
 {
     public Guid Id { get; set; }
 
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     public bool IsInStock { get; set; }
 
@@ -13,8 +13,8 @@ public class ProductDto
 
     public decimal Price { get; set; }
 
-    public string ImagePath { get; set; }
+    public required string ImagePath { get; set; }
 
-    public ICollection<ProductCategoryDto> ProductCategories{ get; set; }
+    public required IReadOnlyCollection<ProductCategoryDto> ProductCategories { get; set; }
 
 }

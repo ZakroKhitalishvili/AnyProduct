@@ -4,28 +4,26 @@ using AnyProduct.Orders.Application.IntegrationEvents;
 using AnyProduct.Orders.Application.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 
 public class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
 {
-    private readonly ILogger<TransactionBehavior<TRequest, TResponse>> _logger;
     private readonly IUnitOfWork _transactionService;
     private readonly IIntegrationEventService _integrationEventService;
 
     public TransactionBehavior(
         IIntegrationEventService orderingIntegrationEventService,
-        ILogger<TransactionBehavior<TRequest, TResponse>> logger,
         IUnitOfWork transactionService)
     {
-        _integrationEventService = orderingIntegrationEventService ?? throw new ArgumentException(nameof(orderingIntegrationEventService));
-        _logger = logger ?? throw new ArgumentException(nameof(ILogger));
+        _integrationEventService = orderingIntegrationEventService;
         _transactionService = transactionService;
     }
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(TRequest request, [NotNull] RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         var response = default(TResponse);
 
-        if (!typeof(TRequest).Name.EndsWith("Command"))
+        if (!typeof(TRequest).Name.EndsWith("Command", StringComparison.OrdinalIgnoreCase))
         {
             return await next();
         }
@@ -47,7 +45,7 @@ public class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
 
             return response;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             _transactionService.Rollback();
             throw;

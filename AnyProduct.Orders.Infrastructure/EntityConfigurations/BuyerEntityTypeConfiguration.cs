@@ -1,24 +1,25 @@
-﻿using AnyProduct.Orders.Domain.Entities.Buyer;
+﻿using AnyProduct.Orders.Domain.Entities.BuyerAggregate;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Infrastructure.EntityConfigurations;
 
 public class BuyerEntityTypeConfiguration
     : IEntityTypeConfiguration<Buyer>
 {
-    public void Configure(EntityTypeBuilder<Buyer> buyerConfiguration)
+    public void Configure([NotNull] EntityTypeBuilder<Buyer> builder)
     {
-        buyerConfiguration.ToTable("buyers");
+        builder.ToTable("buyers");
 
-        buyerConfiguration.Ignore(b => b.DomainEvents);
+        builder.Ignore(b => b.DomainEvents);
 
-        buyerConfiguration.HasKey(b => b.AggregateId);
+        builder.HasKey(b => b.AggregateId);
 
-        buyerConfiguration.HasMany(b => b.PaymentMethods).WithOne();
+        builder.HasMany(b => b.PaymentMethods).WithOne();
 
-        buyerConfiguration.HasIndex(b => b.AggregateId)
+        builder.HasIndex(b => b.AggregateId)
             .IsUnique(true);
 
     }

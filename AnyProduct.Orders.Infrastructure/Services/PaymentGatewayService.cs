@@ -1,13 +1,13 @@
 ﻿
 using AnyProduct.Orders.Application.Services;
-using AnyProduct.Orders.Domain.Entities.Buyer;
-using AnyProduct.Orders.Domain.Entities.Order;
+using AnyProduct.Orders.Domain.Entities.BuyerAggregate;
+using AnyProduct.Orders.Domain.Entities.OrderAggregate;
 
 namespace AnyProduct.Orders.Infrastructure.Services;
 
 public class PaymentGatewayService : IPaymentGatewayService
 {
-    public Task<string> CreateRequest(Order order, PaymentMethod paymentMethod, string webhookUrl)
+    public Task<string> CreateRequest(Order order, PaymentMethod paymentMethod, Uri? webhookUrl)
     {
         Task.Delay(1000);
 
@@ -21,7 +21,7 @@ public class PaymentGatewayService : IPaymentGatewayService
         return Task.FromResult(true);
     }
 
-    public Task<bool> Refund(string requestId, string webhookUrl)
+    public Task<bool> Refund(string requestId, Uri? webhookUrl)
     {
         Task.Delay(5000);
 

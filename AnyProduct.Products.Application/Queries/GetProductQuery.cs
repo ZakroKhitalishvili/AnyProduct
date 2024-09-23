@@ -5,6 +5,7 @@ using AnyProduct.Products.Domain.Entities;
 using AnyProduct.Products.Domain.Repositories;
 using MediatR;
 using Microsoft.Extensions.Configuration;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Products.Application.Queries;
 
@@ -15,9 +16,9 @@ public class GetProductQuery : IRequest<ProductDto?>
 
 public class GetProductQueryHandler : IRequestHandler<GetProductQuery, ProductDto?>
 {
-    public readonly IProductRepository _productRepository;
-    public readonly IProductCategoryRepository _productCategoryRepository;
-    public readonly IConfiguration _configuration;
+    private readonly IProductRepository _productRepository;
+    private readonly IProductCategoryRepository _productCategoryRepository;
+    private readonly IConfiguration _configuration;
 
     public GetProductQueryHandler(IProductRepository productRepository, IProductCategoryRepository productCategoryRepository, IConfiguration configuration)
     {
@@ -26,7 +27,7 @@ public class GetProductQueryHandler : IRequestHandler<GetProductQuery, ProductDt
         _configuration = configuration;
     }
 
-    public async Task<ProductDto?> Handle(GetProductQuery request, CancellationToken cancellationToken)
+    public Task<ProductDto?> Handle([NotNull] GetProductQuery request, CancellationToken cancellationToken)
     {
 
         var product = _productRepository.FindById(request.Id);
@@ -34,7 +35,7 @@ public class GetProductQueryHandler : IRequestHandler<GetProductQuery, ProductDt
         if (product is { })
         {
             var categories = _productCategoryRepository.FindManyById(product.ProductCategoryIds);
-            return new ProductDto
+            var productDto = new ProductDto
             {
                 Id = product.AggregateId,
                 ImagePath = $"{_configuration["FileUpload:BaseUrl"]}/{product.Image}",
@@ -47,10 +48,12 @@ public class GetProductQueryHandler : IRequestHandler<GetProductQuery, ProductDt
                     Id = c.AggregateId,
                     Name = c.Name,
                 }).ToList(),
-            };
+            }!;
+
+            return Task.FromResult<ProductDto?>(productDto);
         }
 
 
-        return null;
+        return Task.FromResult<ProductDto?>(null);
     }
 }

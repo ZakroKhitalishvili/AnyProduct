@@ -3,6 +3,7 @@
 using AnyProduct.Orders.Application.Dtos;
 using AnyProduct.Orders.Domain.Repositories;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Application.Queries;
 
@@ -13,14 +14,14 @@ public class GetSingleOrderQuery : IRequest<OrderDto?>
 
 public class GetSingleOrderQueryHandler : IRequestHandler<GetSingleOrderQuery, OrderDto?>
 {
-    public readonly IOrderRepository _orderRepository;
+    private readonly IOrderRepository _orderRepository;
 
     public GetSingleOrderQueryHandler(IOrderRepository orderRepository)
     {
         _orderRepository = orderRepository;
     }
 
-    public async Task<OrderDto?> Handle(GetSingleOrderQuery request, CancellationToken cancellationToken)
+    public async Task<OrderDto?> Handle([NotNull] GetSingleOrderQuery request, CancellationToken cancellationToken)
     {
         var order = await _orderRepository.FindByIdAsync(request.Id);
 

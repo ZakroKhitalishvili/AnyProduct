@@ -30,7 +30,7 @@ public class ProductRepository : IProductRepository
         return _context.Products.SingleOrDefault(x => x.AggregateId == id);
     }
 
-    public ICollection<Product> GetList(out int totalSize, ICollection<Guid> categories, int page = 1, int pageSize = 10)
+    public ICollection<Product> GetList(out int totalSize, ICollection<Guid>? categories, int page = 1, int pageSize = 10)
     {
         var query = _context.Products.AsNoTracking();
 

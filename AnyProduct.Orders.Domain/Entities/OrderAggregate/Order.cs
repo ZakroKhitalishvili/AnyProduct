@@ -1,8 +1,8 @@
-﻿using AnyProduct.Orders.Domain.Entities.Buyer;
+﻿using AnyProduct.Orders.Domain.Entities.BuyerAggregate;
 using AnyProduct.Orders.Domain.Events;
 using System.ComponentModel.DataAnnotations;
 
-namespace AnyProduct.Orders.Domain.Entities.Order;
+namespace AnyProduct.Orders.Domain.Entities.OrderAggregate;
 
 public class Order
     : AggregateRoot
@@ -68,7 +68,7 @@ public class Order
         }
     }
 
-    public void UpdateStockDetailsForItem(Guid productId, string productName, decimal unitPrice, string imageUrl)
+    public void UpdateStockDetailsForItem(Guid productId, string productName, decimal unitPrice, Uri? imageUrl)
     {
         var existingOrderForProduct = _orderItems.SingleOrDefault(o => o.ProductId == productId);
 
@@ -150,7 +150,7 @@ public class Order
 
     private void StatusChangeException(OrderStatus orderStatusToChange)
     {
-        throw new Exception($"Is not possible to change the order status from {OrderStatus} to {orderStatusToChange}.");
+        throw new InvalidOperationException($"Is not possible to change the order status from {OrderStatus} to {orderStatusToChange}.");
     }
 
     public decimal GetTotal()

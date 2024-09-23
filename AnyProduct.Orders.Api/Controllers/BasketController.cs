@@ -1,8 +1,7 @@
 ﻿using AnyProduct.Orders.Application.Commands.Basket;
+using AnyProduct.Orders.Application.Dtos.Basket;
 using AnyProduct.Orders.Application.Queries;
-using AnyProduct.Orders.Domain.Entities.Basket;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AnyProduct.Orders.Api.Controllers;

@@ -1,6 +1,8 @@
 ﻿using AnyProduct.EventBus.Events;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 
 namespace AnyProduct.OutBox.EF;
@@ -9,26 +11,28 @@ public class IntegrationEventLogEntry
 {
     private static readonly JsonSerializerOptions s_indentedOptions = new() { WriteIndented = true };
     private static readonly JsonSerializerOptions s_caseInsensitiveOptions = new() { PropertyNameCaseInsensitive = true };
-
+   
     private IntegrationEventLogEntry() { }
-    public IntegrationEventLogEntry(IntegrationEvent @event, Guid transactionId)
+
+    public IntegrationEventLogEntry([NotNull] IntegrationEvent @event, Guid transactionId)
     {
         EventId = @event.Id;
         CreationTime = @event.CreationDate;
-        EventTypeName = @event.GetType().FullName;
+        EventTypeName = @event.GetType().FullName!;
         Content = JsonSerializer.Serialize(@event, @event.GetType(), s_indentedOptions);
-        State = EventStateEnum.NotPublished;
+        State = EventState.NotPublished;
         TimesSent = 0;
         TransactionId = transactionId;
     }
+
     public Guid EventId { get; private set; }
     [Required]
     public string EventTypeName { get; private set; }
     [NotMapped]
-    public string EventTypeShortName => EventTypeName.Split('.')?.Last();
+    public string EventTypeShortName => EventTypeName.Split('.').Last();
     [NotMapped]
-    public IntegrationEvent IntegrationEvent { get; private set; }
-    public EventStateEnum State { get; set; }
+    public IntegrationEvent? IntegrationEvent { get; private set; }
+    public EventState State { get; set; }
     public int TimesSent { get; set; }
     public DateTime CreationTime { get; private set; }
     [Required]

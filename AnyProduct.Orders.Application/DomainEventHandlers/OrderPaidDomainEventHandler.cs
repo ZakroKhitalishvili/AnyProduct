@@ -3,6 +3,7 @@ using AnyProduct.Orders.Application.IntegrationEvents;
 using AnyProduct.Orders.Application.IntegrationEvents.Models;
 using AnyProduct.Orders.Domain.Events;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Application.DomainEventHandlers;
 
@@ -15,7 +16,7 @@ public class OrderPaidDomainEventHandler : INotificationHandler<DomainEventNotif
         _integrationEventService = integrationEventService;
     }
 
-    public async Task Handle(DomainEventNotification<OrderPaidDomainEvent> notification, CancellationToken cancellationToken)
+    public async Task Handle([NotNull] DomainEventNotification<OrderPaidDomainEvent> notification, CancellationToken cancellationToken)
     {
         await _integrationEventService.AddEventAsync(
             new OrderPaidIntergationEvent(

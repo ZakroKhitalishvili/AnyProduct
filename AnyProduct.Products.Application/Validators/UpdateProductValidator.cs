@@ -1,6 +1,8 @@
 ﻿using AnyProduct.Products.Application.Commands;
 using FluentValidation;
 
+namespace AnyProduct.Products.Application.Validators;
+
 public class UpdateProductValidator : AbstractValidator<UpdateProductCommand>
 {
     private const int ImageMaxSizeInBytes = 5_242_880;// 5mb

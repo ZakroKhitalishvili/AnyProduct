@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Application.Behaviours;
 
@@ -12,7 +13,7 @@ public class ValidatorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest
         _validators = validators;
     }
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(TRequest request, [NotNull] RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
 
         var failures = _validators
@@ -21,7 +22,7 @@ public class ValidatorBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest
             .Where(error => error != null)
             .ToList();
 
-        if (failures.Any())
+        if (failures.Count != 0)
         {
 
             throw new ValidationException("Validation exception", failures);

@@ -19,10 +19,10 @@ public class IntegrationEventService(IEventBus eventBus,
             try
             {
                 await _outboxService.MarkEventAsInProgressAsync(logEvt.EventId);
-                await _eventBus.PublishAsync(logEvt.IntegrationEvent);
+                await _eventBus.PublishAsync(logEvt.IntegrationEvent!);
                 await _outboxService.MarkEventAsPublishedAsync(logEvt.EventId);
             }
-            catch (Exception ex)
+            catch
             {
                 await _outboxService.MarkEventAsFailedAsync(logEvt.EventId);
             }

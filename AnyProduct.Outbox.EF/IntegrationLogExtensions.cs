@@ -3,13 +3,14 @@ using AnyProduct.OutBox.EF.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace AnyProduct.OutBox.EF;
 
 public static class IntegrationLogExtensions
 {
-    public static void UseOutboxEventLogs(this ModelBuilder builder)
+    public static void UseOutboxEventLogs([NotNull] this ModelBuilder builder)
     {
         builder.Entity<IntegrationEventLogEntry>(builder =>
         {
@@ -19,7 +20,7 @@ public static class IntegrationLogExtensions
         });
     }
 
-    public static void AddOutbox<TContext>(this IHostApplicationBuilder builder, Assembly integrationEventAssembly) where TContext : DbContext
+    public static void AddOutbox<TContext>([NotNull] this IHostApplicationBuilder builder, Assembly integrationEventAssembly) where TContext : DbContext
     {
 
         builder.Services.AddScoped<IOutboxService, EFOutboxService<TContext>>(options =>

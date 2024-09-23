@@ -4,7 +4,7 @@ namespace AnyProduct.EventBus.Kafka;
 
 public class KafkaTelemetry
 {
-    public static string ActivitySourceName = "AnyProduct.EventBus.Kafka";
+    public const string ActivitySourceName = "AnyProduct.EventBus.Kafka";
     public ActivitySource ActivitySource { get; } = new(ActivitySourceName);
     public TextMapPropagator Propagator { get; } = Propagators.DefaultTextMapPropagator;
 }

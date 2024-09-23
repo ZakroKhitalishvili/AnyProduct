@@ -3,20 +3,21 @@ using AnyProduct.Products.Application.IntegrationEvents.Models;
 using AnyProduct.Products.Domain.Entities;
 using AnyProduct.Products.Domain.Repositories;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Products.Application.Commands;
 
 public class PrepareProductShipmentCommand : IRequest<Unit>
 {
-    public Guid OrderId { get; set; }
-    public ICollection<OrderStockItem> OrderStockItems { get; set; }
+    public required Guid OrderId { get; set; }
+    public required IReadOnlyCollection<OrderStockItem> OrderStockItems { get; set; }
 
 }
 
 public class PrepareProductShipmentCommandHandler : IRequestHandler<PrepareProductShipmentCommand, Unit>
 {
-    public readonly IProductRepository _productRepository;
-    public readonly IIntegrationEventService _integrationEventService;
+    private readonly IProductRepository _productRepository;
+    private readonly IIntegrationEventService _integrationEventService;
 
     public PrepareProductShipmentCommandHandler(IProductRepository productRepository, IIntegrationEventService integrationEventService)
     {
@@ -24,9 +25,8 @@ public class PrepareProductShipmentCommandHandler : IRequestHandler<PrepareProdu
         _integrationEventService = integrationEventService;
     }
 
-    public async Task<Unit> Handle(PrepareProductShipmentCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle([NotNull] PrepareProductShipmentCommand request, CancellationToken cancellationToken)
     {
-        var rejectedProducts = new List<Guid>();
 
         foreach (var stockItem in request.OrderStockItems)
         {
@@ -34,7 +34,7 @@ public class PrepareProductShipmentCommandHandler : IRequestHandler<PrepareProdu
 
             if (product is null)
             {
-                throw new Exception("Product not found");
+                throw new InvalidOperationException("Product not found");
             }
             else
             {
@@ -43,7 +43,7 @@ public class PrepareProductShipmentCommandHandler : IRequestHandler<PrepareProdu
             }
         }
 
-        // performa other operations relevant to shipment
+        // perform other operations relevant to a shipment
 
         await _integrationEventService.AddEventAsync(new OrderShippedIntergationEvent(request.OrderId));
 

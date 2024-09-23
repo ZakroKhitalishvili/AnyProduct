@@ -1,14 +1,15 @@
 ﻿
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace AnyProduct.Orders.Domain.Entities.Basket;
+namespace AnyProduct.Orders.Domain.Entities.BasketAggregate;
 
 public class CustomerBasket : AggregateRoot
 {
     [Required]
     public string BuyerId { get; private set; }
 
-    public List<BasketItem> Items { get; private set; } = [];
+    public Collection<BasketItem> Items { get; private set; } = [];
 
     public CustomerBasket() { }
 

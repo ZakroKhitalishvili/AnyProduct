@@ -3,14 +3,15 @@ using AnyProduct.Products.Domain.Repositories;
 using AnyProduct.Products.Domain.Services;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Products.Application.Commands;
 
 public class UpdateProductCommand : IRequest<Unit>
 {
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
 
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     public int Amount { get; set; }
 
@@ -18,7 +19,7 @@ public class UpdateProductCommand : IRequest<Unit>
 
     public IFormFile? Image { get; set; }
 
-    public ICollection<Guid> ProductCategoryIds { get; set; }
+    public required IReadOnlyCollection<Guid> ProductCategoryIds { get; set; }
 }
 
 public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand, Unit>
@@ -36,28 +37,27 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
         _productCategoryRepository = productCategoryRepository;
     }
 
-    public async Task<Unit> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle([NotNull] UpdateProductCommand request, CancellationToken cancellationToken)
     {
         var categoryIdSet = request.ProductCategoryIds.ToHashSet();
 
-        foreach (var categoryId in categoryIdSet)
+        var invalidCategoryId = categoryIdSet.FirstOrDefault(categoryId => _productCategoryRepository.FindById(categoryId) is null);
+
+        if (invalidCategoryId is { })
         {
-            if (_productCategoryRepository.FindById(categoryId) is null)
-            {
-                throw new Exception($"Category Id {categoryId} is not valid");
-            }
+            throw new InvalidOperationException($"Category Id {invalidCategoryId} is not valid");
         }
 
         var product = _productRepository.FindById(request.Id);
 
         if (product is null)
-            throw new Exception("Product not found");
+            throw new InvalidOperationException("Product not found");
 
         string image = product.Image;
 
         if (request.Image is not null)
         {
-            var (originalName, uniqueName) = await _fileService.UploadAsync(request.Image);
+            var (_, uniqueName) = await _fileService.UploadAsync(request.Image);
 
             await _fileService.DeleteAsync(product.Image);
 

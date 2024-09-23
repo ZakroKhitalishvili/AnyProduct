@@ -1,6 +1,7 @@
 ﻿
 using AnyProduct.Products.Application.Services;
 using Microsoft.AspNetCore.Http;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Products.Infrastructure.Services;
 
@@ -18,30 +19,30 @@ public class LocalFileService : IFileService
             fileInfo.Delete();
             return Task.FromResult(true);
         }
-        catch (Exception ex)
+        catch (IOException)
         {
             return Task.FromResult(false);
         }
     }
 
-    public async Task<(string originalName, string uniqueName)> UploadAsync(IFormFile formFile)
+    public async Task<(string originalName, string uniqueName)> UploadAsync([NotNull] IFormFile file)
     {
 
-        if (formFile.Length > 0)
+        if (file.Length > 0)
         {
-            string uniqueName = $"{Guid.NewGuid()}{Path.GetExtension(formFile.FileName)}";
+            string uniqueName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
             var filePath = $"{RootFolder}/{uniqueName}";
 
             Directory.CreateDirectory(RootFolder);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                await formFile.CopyToAsync(stream);
+                await file.CopyToAsync(stream);
             }
 
-            return (formFile.Name, uniqueName);
+            return (file.Name, uniqueName);
         }
 
-        throw new ArgumentException("File is empty", nameof(formFile));
+        throw new ArgumentException("File is empty", nameof(file));
     }
 }

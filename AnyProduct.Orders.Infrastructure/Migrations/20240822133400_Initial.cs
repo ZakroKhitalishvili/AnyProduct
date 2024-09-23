@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -9,7 +10,7 @@ namespace AnyProduct.Orders.Infrastructure.Migrations
     public partial class Initial : Migration
     {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
+        protected override void Up([NotNull] MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
                 name: "orders");
@@ -212,7 +213,7 @@ namespace AnyProduct.Orders.Infrastructure.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
+        protected override void Down([NotNull] MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "BasketItem",

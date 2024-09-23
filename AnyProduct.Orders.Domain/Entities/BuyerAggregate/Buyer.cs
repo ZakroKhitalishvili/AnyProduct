@@ -1,7 +1,7 @@
 ﻿using AnyProduct.Orders.Domain.Events;
 using System.ComponentModel.DataAnnotations;
 
-namespace AnyProduct.Orders.Domain.Entities.Buyer;
+namespace AnyProduct.Orders.Domain.Entities.BuyerAggregate;
 
 public class Buyer
     : AggregateRoot
@@ -11,7 +11,7 @@ public class Buyer
 
     public string Name { get; private set; }
 
-    private List<PaymentMethod> _paymentMethods;
+    private readonly List<PaymentMethod> _paymentMethods;
 
     public IEnumerable<PaymentMethod> PaymentMethods => _paymentMethods.AsReadOnly();
 

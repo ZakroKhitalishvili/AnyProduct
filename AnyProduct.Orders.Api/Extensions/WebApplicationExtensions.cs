@@ -1,11 +1,13 @@
 ﻿using AnyProduct.Orders.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Api.Extensions;
 
 public static class WebApplicationExtensions
 {
-    public static void EnsureMigrations(this WebApplication app)
+    public static void EnsureMigrations([NotNull] this WebApplication app)
     {
         using (var scope = app.Services.CreateScope())
         {
@@ -21,13 +23,11 @@ public static class WebApplicationExtensions
                 }
 
             }
-            catch (Exception ex)
+            catch (DbException ex)
             {
                 var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
                 logger.LogError(ex, "An error occurred while migrating or seeding the database.");
-
-                throw;
             }
         }
     }

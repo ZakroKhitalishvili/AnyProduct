@@ -2,7 +2,7 @@
 
 public class PagedListDto<T>
 {
-    public ICollection<T> Items { get; set; }
+    public required ICollection<T> Items { get; init; }
 
     public int Total { get; set; }
 

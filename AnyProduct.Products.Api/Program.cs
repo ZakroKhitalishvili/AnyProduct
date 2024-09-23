@@ -1,4 +1,3 @@
-using AnyProduct.OutBox.EF.Services;
 using AnyProduct.Products.Api.Extensions;
 using AnyProduct.Products.Application.Behaviours;
 using AnyProduct.Products.Application.Commands;
@@ -16,7 +15,6 @@ using AnyProduct.Products.Application.IntegrationEventHandlers;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Swashbuckle.AspNetCore.Filters;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -26,6 +24,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Logs;
+using AnyProduct.Products.Application.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +77,7 @@ builder.Services
     {
         o.RequireHttpsMetadata = false;
         o.SaveToken = true;
+#pragma warning disable CA5404 // Do not disable token validation checks
         o.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = false,
@@ -93,6 +93,7 @@ builder.Services
             },
 
         };
+#pragma warning restore CA5404 // Do not disable token validation checks
     });
 
 
@@ -182,4 +183,6 @@ app.MapControllers();
 
 app.EnsureMigrations();
 
+#pragma warning disable S6966 // Awaitable method should be used
 app.Run();
+#pragma warning restore S6966 // Awaitable method should be used

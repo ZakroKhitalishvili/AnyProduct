@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System.Diagnostics.CodeAnalysis;
 
 #nullable disable
 
@@ -8,7 +9,7 @@ namespace AnyProduct.Orders.Infrastructure.Migrations
     public partial class Orders_MadeSomePropertiesOptional : Migration
     {
         /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
+        protected override void Up([NotNull] MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<decimal>(
                 name: "UnitPrice",
@@ -39,7 +40,7 @@ namespace AnyProduct.Orders.Infrastructure.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
+        protected override void Down([NotNull] MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<decimal>(
                 name: "UnitPrice",

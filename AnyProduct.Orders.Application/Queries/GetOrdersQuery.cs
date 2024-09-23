@@ -3,6 +3,7 @@
 using AnyProduct.Orders.Application.Dtos;
 using AnyProduct.Orders.Domain.Repositories;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Application.Queries;
 
@@ -15,14 +16,14 @@ public class GetOrderQuery : IRequest<PagedListDto<OrderDto>>
 
 public class GetOrdersQueryHandler : IRequestHandler<GetOrderQuery, PagedListDto<OrderDto>>
 {
-    public readonly IOrderRepository _orderRepository;
+    private readonly IOrderRepository _orderRepository;
 
     public GetOrdersQueryHandler(IOrderRepository orderRepository)
     {
         _orderRepository = orderRepository;
     }
 
-    public async Task<PagedListDto<OrderDto>> Handle(GetOrderQuery request, CancellationToken cancellationToken)
+    public Task<PagedListDto<OrderDto>> Handle([NotNull] GetOrderQuery request, CancellationToken cancellationToken)
     {
         request.Page ??= 1;
         request.PageSize ??= 10;
@@ -44,6 +45,6 @@ public class GetOrdersQueryHandler : IRequestHandler<GetOrderQuery, PagedListDto
         }
 
 
-        return result;
+        return Task.FromResult(result);
     }
 }

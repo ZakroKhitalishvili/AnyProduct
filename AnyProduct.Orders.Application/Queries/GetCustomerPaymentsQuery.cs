@@ -3,6 +3,7 @@ using AnyProduct.Orders.Application.Dtos;
 using AnyProduct.Orders.Application.Services;
 using AnyProduct.Orders.Domain.Repositories;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Application.Queries;
 
@@ -15,8 +16,8 @@ public class GetCustomerPaymentsQuery : IRequest<PagedListDto<PaymentDto>>
 
 public class GetCustomerOrdersQueryHandlerHandler : IRequestHandler<GetCustomerPaymentsQuery, PagedListDto<PaymentDto>>
 {
-    public readonly IPaymentRepository _paymentRepository;
-    public readonly ICurrentUserProvider _currentUserProvider;
+    private readonly IPaymentRepository _paymentRepository;
+    private readonly ICurrentUserProvider _currentUserProvider;
 
     public GetCustomerOrdersQueryHandlerHandler(IPaymentRepository paymentRepository, ICurrentUserProvider currentUserProvider)
     {
@@ -24,7 +25,7 @@ public class GetCustomerOrdersQueryHandlerHandler : IRequestHandler<GetCustomerP
         _currentUserProvider = currentUserProvider;
     }
 
-    public async Task<PagedListDto<PaymentDto>> Handle(GetCustomerPaymentsQuery request, CancellationToken cancellationToken)
+    public Task<PagedListDto<PaymentDto>> Handle([NotNull] GetCustomerPaymentsQuery request, CancellationToken cancellationToken)
     {
         request.Page ??= 1;
         request.PageSize ??= 10;
@@ -52,6 +53,6 @@ public class GetCustomerOrdersQueryHandlerHandler : IRequestHandler<GetCustomerP
             });
         }
 
-        return result;
+        return Task.FromResult(result);
     }
 }

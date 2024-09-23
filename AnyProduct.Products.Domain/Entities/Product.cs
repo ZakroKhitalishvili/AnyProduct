@@ -24,7 +24,9 @@ public class Product : AggregateRoot
     public DateTime UpdatedDate { get; private set; }
 
     [Required]
-    public ICollection<Guid> ProductCategoryIds { get; private set; }
+    public IList<Guid> ProductCategoryIds { get; private set; }
+
+    protected Product() { }
 
     public Product(string name, int amount, decimal price, string image, DateTime createdDate, ICollection<Guid> productCategoryIds)
     {
@@ -34,7 +36,7 @@ public class Product : AggregateRoot
         Price = price;
         CreatedDate = createdDate;
         AggregateId = Guid.NewGuid();
-        ProductCategoryIds = productCategoryIds;
+        ProductCategoryIds = productCategoryIds.ToList();
         ReservedAmount = 0;
         AddEvent(new ProductAddedDomainEvent(this));
     }
@@ -46,7 +48,7 @@ public class Product : AggregateRoot
         Amount = amount;
         Price = price;
         UpdatedDate = updateDate;
-        ProductCategoryIds = productCategoryIds;
+        ProductCategoryIds = productCategoryIds.ToList();
         AddEvent(new ProductUpdatedDomainEvent(this));
     }
 
@@ -54,12 +56,12 @@ public class Product : AggregateRoot
     {
         if (units <= 0)
         {
-            throw new ArgumentException(nameof(units), "Value cannot be zero or negative");
+            throw new ArgumentException("Value cannot be zero or negative", nameof(units));
         }
 
         if (Amount < units)
         {
-            throw new Exception("Not enough products to reserve");
+            throw new InvalidOperationException("Not enough products to reserve");
         }
 
         Amount -= units;
@@ -70,12 +72,12 @@ public class Product : AggregateRoot
     {
         if (units <= 0)
         {
-            throw new ArgumentException(nameof(units), "Value cannot be zero or negative");
+            throw new ArgumentException("Value cannot be zero or negative", nameof(units));
         }
 
         if (ReservedAmount < units)
         {
-            throw new Exception("Not enough reserved products to remove");
+            throw new InvalidOperationException("Not enough reserved products to remove");
         }
 
         Amount += units;
@@ -87,12 +89,12 @@ public class Product : AggregateRoot
     {
         if (units <= 0)
         {
-            throw new ArgumentException(nameof(units), "Value cannot be zero or negative");
+            throw new ArgumentException("Value cannot be zero or negative", nameof(units));
         }
 
         if (ReservedAmount < units)
         {
-            throw new Exception("Not enough reserved products to ship");
+            throw new InvalidOperationException("Not enough reserved products to ship");
         }
 
         ReservedAmount -= units;

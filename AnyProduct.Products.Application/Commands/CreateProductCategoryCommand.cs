@@ -2,12 +2,13 @@
 using AnyProduct.Products.Domain.Repositories;
 using AnyProduct.Products.Domain.Services;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Products.Application.Commands;
 
 public class CreateProductCategoryCommand : IRequest<Unit>
 {
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
 }
 
@@ -22,11 +23,11 @@ public class CreateProductCategoryCommandHandler : IRequestHandler<CreateProduct
         _dateTimeProvider = dateTimeProvider;
     }
 
-    public async Task<Unit> Handle(CreateProductCategoryCommand request, CancellationToken cancellationToken)
+    public Task<Unit> Handle([NotNull] CreateProductCategoryCommand request, CancellationToken cancellationToken)
     {
         if (_productCategoryRepository.ExistName(request.Name))
         {
-            throw new Exception("Name is already used");
+            throw new InvalidOperationException("Name is already used");
         }
 
         var productCategory = new ProductCategory(
@@ -36,7 +37,7 @@ public class CreateProductCategoryCommandHandler : IRequestHandler<CreateProduct
 
         _productCategoryRepository.Add(productCategory);
 
-        return Unit.Value;
+        return Task.FromResult(Unit.Value);
     }
 
 }

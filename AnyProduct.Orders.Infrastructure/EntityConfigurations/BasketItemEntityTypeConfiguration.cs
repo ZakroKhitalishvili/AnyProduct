@@ -1,18 +1,19 @@
 ﻿
-using AnyProduct.Orders.Domain.Entities.Basket;
+using AnyProduct.Orders.Domain.Entities.BasketAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Infrastructure.EntityConfigurations;
 
 public class BasketItemEntityTypeConfiguration
     : IEntityTypeConfiguration<BasketItem>
 {
-    public void Configure(EntityTypeBuilder<BasketItem> baskeItemConfiguration)
+    public void Configure([NotNull] EntityTypeBuilder<BasketItem> builder)
     {
-        baskeItemConfiguration.ToTable("basket_items");
+        builder.ToTable("basket_items");
 
-        baskeItemConfiguration.HasKey(b => b.Id);
+        builder.HasKey(b => b.Id);
 
     }
 }

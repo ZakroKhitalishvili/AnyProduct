@@ -1,6 +1,6 @@
 ﻿
 
-using AnyProduct.Orders.Domain.Entities.Order;
+using AnyProduct.Orders.Domain.Entities.OrderAggregate;
 using System.ComponentModel.DataAnnotations;
 
 namespace AnyProduct.Orders.Application.Dtos;
@@ -17,6 +17,8 @@ public class PlacedOrderDto
 
     public static PlacedOrderDto From(Order order)
     {
+        ArgumentNullException.ThrowIfNull(order);
+
         return new PlacedOrderDto
         {
             Id = order.AggregateId,

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace AnyProduct.Identity.Api.Entities;
@@ -14,8 +15,10 @@ public class User : IdentityUser
 
 public class UserValidator : IUserValidator<User>
 {
-    public async Task<IdentityResult> ValidateAsync(UserManager<User> manager, User user)
+    public Task<IdentityResult> ValidateAsync([NotNull] UserManager<User> manager, [NotNull] User user)
     {
+        var result = IdentityResult.Success;
+
         if (!string.IsNullOrWhiteSpace(user.PersonalNumber))
         {
             string pattern = @"^\d{11}$";
@@ -24,7 +27,7 @@ public class UserValidator : IUserValidator<User>
 
             if (!isMatch)
             {
-                return IdentityResult.Failed(new IdentityError()
+                result = IdentityResult.Failed(new IdentityError()
                 {
                     Code = "WrongPersonalNumber",
                     Description = "Personal number should contain only 11 digits"
@@ -33,8 +36,7 @@ public class UserValidator : IUserValidator<User>
 
         }
 
-        return IdentityResult.Success;
-
+        return Task.FromResult(result);
 
     }
 }

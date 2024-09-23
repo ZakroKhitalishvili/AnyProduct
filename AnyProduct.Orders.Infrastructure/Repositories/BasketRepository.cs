@@ -1,4 +1,4 @@
-﻿using AnyProduct.Orders.Domain.Entities.Basket;
+﻿using AnyProduct.Orders.Domain.Entities.BasketAggregate;
 using AnyProduct.Orders.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,9 +18,9 @@ public class BasketRepository : IBasketRepository
         return _context.Baskets.Add(basket).Entity;
     }
 
-    public async Task<CustomerBasket?> FindByCustomerIdAsync(string id)
+    public async Task<CustomerBasket?> FindByCustomerIdAsync(string customerId)
     {
-        var basket = await _context.Baskets.SingleOrDefaultAsync(x => x.BuyerId == id);
+        var basket = await _context.Baskets.SingleOrDefaultAsync(x => x.BuyerId == customerId);
 
         if (basket != null)
         {

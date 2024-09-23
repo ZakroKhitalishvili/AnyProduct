@@ -1,10 +1,11 @@
 ﻿
 using AnyProduct.Orders.Application.IntegrationEvents;
 using AnyProduct.Orders.Application.IntegrationEvents.Models;
-using AnyProduct.Orders.Domain.Entities.Buyer;
+using AnyProduct.Orders.Domain.Entities.BuyerAggregate;
 using AnyProduct.Orders.Domain.Events;
 using AnyProduct.Orders.Domain.Repositories;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Application.DomainEventHandlers;
 
@@ -23,7 +24,7 @@ public class OrderStartedDomainEventHandler : INotificationHandler<DomainEventNo
         _orderRepository = orderRepository;
     }
 
-    public async Task Handle(DomainEventNotification<OrderStartedDomainEvent> notification, CancellationToken cancellationToken)
+    public async Task Handle([NotNull] DomainEventNotification<OrderStartedDomainEvent> notification, CancellationToken cancellationToken)
     {
         var basket = await _basketRepository.FindByCustomerIdAsync(notification.DomainEvent.UserId);
         var buyer = await _buyerRepository.FindByCustomerIdAsync(notification.DomainEvent.UserId);

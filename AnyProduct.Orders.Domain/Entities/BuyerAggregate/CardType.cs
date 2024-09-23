@@ -1,4 +1,4 @@
-﻿namespace AnyProduct.Orders.Domain.Entities.Buyer;
+﻿namespace AnyProduct.Orders.Domain.Entities.BuyerAggregate;
 
 /// <remarks> 
 /// Card type class should be marked as abstract with protected constructor to encapsulate known enum types

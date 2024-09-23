@@ -3,7 +3,7 @@ namespace AnyProduct.Products.Application.Dtos;
 
 public class PagedListDto<T>
 {
-    public ICollection<T> Items { get; set; }
+    public required IReadOnlyCollection<T> Items { get; set; }
 
     public int Total { get; set; }
 

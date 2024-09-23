@@ -1,5 +1,5 @@
 ﻿
-namespace AnyProduct.Orders.Domain.Entities.Order;
+namespace AnyProduct.Orders.Domain.Entities.OrderAggregate;
 
 public record AddressValueObject
 (

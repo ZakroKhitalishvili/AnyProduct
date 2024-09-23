@@ -2,7 +2,7 @@
 
 namespace AnyProduct.Orders.Application.Dtos;
 
-public class OrderItemDTO
+public class OrderItemDto
 {
     public Guid ProductId { get; init; }
 

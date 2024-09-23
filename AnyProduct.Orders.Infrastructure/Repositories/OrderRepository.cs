@@ -1,4 +1,4 @@
-﻿using AnyProduct.Orders.Domain.Entities.Order;
+﻿using AnyProduct.Orders.Domain.Entities.OrderAggregate;
 using AnyProduct.Orders.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -46,7 +46,7 @@ public class OrderRepository : IOrderRepository
         _context.Entry(order).State = EntityState.Modified;
     }
 
-    public ICollection<Order> GetList(out int totalSize, string customerId, int page = 1, int pageSize = 10)
+    public ICollection<Order> GetList(out int totalSize, string? customerId, int page = 1, int pageSize = 10)
     {
         var query = _context.Orders.AsNoTracking();
 

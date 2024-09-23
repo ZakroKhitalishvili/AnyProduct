@@ -1,15 +1,17 @@
 ﻿
+using AnyProduct.Orders.Application.Dtos.Basket;
 using AnyProduct.Orders.Application.Services;
-using AnyProduct.Orders.Domain.Entities.Basket;
+using AnyProduct.Orders.Domain.Entities.BasketAggregate;
 using AnyProduct.Orders.Domain.Repositories;
 using AnyProduct.Orders.Domain.Services;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Application.Commands.Basket;
 
 public class UpdateBasketCommand : IRequest<Unit>
 {
-    public ICollection<BasketItemDto> BasketItems { get; set; }
+    public required IReadOnlyCollection<BasketItemDto> BasketItems { get; init; }
 }
 
 public class UpdateBasketCommandHandler : IRequestHandler<UpdateBasketCommand, Unit>
@@ -25,36 +27,32 @@ public class UpdateBasketCommandHandler : IRequestHandler<UpdateBasketCommand, U
         _dateTimeProvider = dateTimeProvider;
     }
 
-    public async Task<Unit> Handle(UpdateBasketCommand request, CancellationToken cancellationToken)
+    public async Task<Unit> Handle([NotNull] UpdateBasketCommand request, CancellationToken cancellationToken)
     {
         var basket = await _basketRepository.FindByCustomerIdAsync(_currentUserProvider.UserId);
 
-        try
+
+        if (basket == null)
         {
-            if (basket == null)
+            basket = new CustomerBasket(_currentUserProvider.UserId);
+
+            foreach (var item in request.BasketItems)
             {
-                basket = new CustomerBasket(_currentUserProvider.UserId);
-
-                foreach (var item in request.BasketItems)
-                {
-                    basket.AddOrUpdateItem(item.ProductId, item.Units, _dateTimeProvider.Now);
-                }
-
-                _basketRepository.Add(basket);
+                basket.AddOrUpdateItem(item.ProductId, item.Units, _dateTimeProvider.Now);
             }
-            else
-            {
-                foreach (var item in request.BasketItems)
-                {
-                    basket.AddOrUpdateItem(item.ProductId, item.Units, _dateTimeProvider.Now);
-                }
 
-                _basketRepository.Update(basket);
-            }
+            _basketRepository.Add(basket);
         }
-        catch (Exception ex)
+        else
         {
+            foreach (var item in request.BasketItems)
+            {
+                basket.AddOrUpdateItem(item.ProductId, item.Units, _dateTimeProvider.Now);
+            }
+
+            _basketRepository.Update(basket);
         }
+
 
         return Unit.Value;
     }

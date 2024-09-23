@@ -8,6 +8,6 @@ public class OrderCancelledIntergationEvent : IntegrationEvent
 {
     public Guid OrderId { get; init; }
 
-    public ICollection<OrderStockItem> OrderStockItems { get; init; }
+    public required IReadOnlyCollection<OrderStockItem> OrderStockItems { get; init; }
 
 }

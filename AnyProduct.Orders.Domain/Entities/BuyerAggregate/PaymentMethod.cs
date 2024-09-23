@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AnyProduct.Orders.Domain.Entities.Buyer;
+namespace AnyProduct.Orders.Domain.Entities.BuyerAggregate;
 
 public class PaymentMethod
 {
@@ -25,13 +25,13 @@ public class PaymentMethod
 
     public PaymentMethod(CardType cardType, string alias, string cardNumber, string securityNumber, string cardHolderName, DateTime expiration)
     {
-        CardNumber = !string.IsNullOrWhiteSpace(cardNumber) ? cardNumber : throw new ArgumentException(nameof(cardNumber));
-        SecurityNumber = !string.IsNullOrWhiteSpace(securityNumber) ? securityNumber : throw new ArgumentException(nameof(securityNumber));
-        CardHolderName = !string.IsNullOrWhiteSpace(cardHolderName) ? cardHolderName : throw new ArgumentException(nameof(cardHolderName));
+        CardNumber = !string.IsNullOrWhiteSpace(cardNumber) ? cardNumber : throw new ArgumentException("Card number is not provided", nameof(cardNumber));
+        SecurityNumber = !string.IsNullOrWhiteSpace(securityNumber) ? securityNumber : throw new ArgumentException("Security number is not provided", nameof(securityNumber));
+        CardHolderName = !string.IsNullOrWhiteSpace(cardHolderName) ? cardHolderName : throw new ArgumentException("Card holder name is not provided", nameof(cardHolderName));
 
         if (expiration < DateTime.UtcNow)
         {
-            throw new Exception("Card is expired");
+            throw new InvalidOperationException("Card is expired");
         }
 
         Alias = alias;

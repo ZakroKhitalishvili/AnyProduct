@@ -1,6 +1,6 @@
 ﻿namespace AnyProduct.Inbox.EF;
 
-public enum InboxEventStateEnum
+public enum InboxEventState
 {
     NotConsumed = 0,
     InProgress = 1,

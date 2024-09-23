@@ -1,21 +1,22 @@
 ﻿using AnyProduct.Products.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Products.Infrastructure.EntityConfigurations;
 
 public class ProductCategoryEntityTypeConfiguration
     : IEntityTypeConfiguration<ProductCategory>
 {
-    public void Configure(EntityTypeBuilder<ProductCategory> buyerConfiguration)
+    public void Configure([NotNull] EntityTypeBuilder<ProductCategory> builder)
     {
-        buyerConfiguration.ToTable("product_categories");
+        builder.ToTable("product_categories");
 
-        buyerConfiguration.Ignore(b => b.DomainEvents);
+        builder.Ignore(b => b.DomainEvents);
 
-        buyerConfiguration.HasKey(b => b.AggregateId);
+        builder.HasKey(b => b.AggregateId);
 
-        buyerConfiguration.HasIndex(b => b.AggregateId)
+        builder.HasIndex(b => b.AggregateId)
             .IsUnique(true);
     }
 }

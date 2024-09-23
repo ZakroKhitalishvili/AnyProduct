@@ -2,11 +2,11 @@
 
 public class EventBusOptions
 {
-    public string BootstrapServers { get; set; }
+    public required string BootstrapServers { get; set; }
 
-    public string ClientId { get; set; } 
+    public required string ClientId { get; set; } 
 
-    public string GroupId { get; set; }
+    public required string GroupId { get; set; }
 
     public int RetryCount { get; set; } = 10;
 }

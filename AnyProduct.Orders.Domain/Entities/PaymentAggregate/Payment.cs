@@ -1,9 +1,10 @@
 ﻿
-namespace AnyProduct.Orders.Domain.Entities.Balance;
+namespace AnyProduct.Orders.Domain.Entities.PaymentAggregate;
 
 public class Payment : AggregateRoot
 {
-    public Payment() { }
+    protected Payment() { }
+
     public Payment(DateTime paymentDate, decimal price, Guid orderid, string buyerId, string externalPaymentId, string paymentMethodDescription)
     {
         AggregateId = Guid.NewGuid();

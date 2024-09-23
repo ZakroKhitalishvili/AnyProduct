@@ -1,16 +1,16 @@
 ﻿using AnyProduct.EventBus.Events;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Inbox.EF.Services;
 
 public class EFInboxService<TContext> : IInboxService
     where TContext : DbContext
 {
-    private volatile bool _disposedValue;
     private readonly TContext _context;
     private readonly InboxOptions _options;
-    public EFInboxService(TContext context, IOptions<InboxOptions> options)
+    public EFInboxService(TContext context, [NotNull] IOptions<InboxOptions> options)
     {
         _context = context;
         _options = options.Value;
@@ -18,12 +18,12 @@ public class EFInboxService<TContext> : IInboxService
 
     public async Task<bool> TryProcessAsync(IntegrationEvent @event, string handler)
     {
-        var eventLogEntry = _context.Set<InboxEventLogEntry>().SingleOrDefault(x => x.EventId == @event.Id && x.Handler == handler);
+        var eventLogEntry = await _context.Set<InboxEventLogEntry>().SingleOrDefaultAsync(x => x.EventId == @event.Id && x.Handler == handler);
 
         if (eventLogEntry is null)
         {
             eventLogEntry = new InboxEventLogEntry(@event, handler);
-            eventLogEntry.State = InboxEventStateEnum.InProgress;
+            eventLogEntry.State = InboxEventState.InProgress;
             eventLogEntry.TimesConsumed = 1;
 
             _context.Add(eventLogEntry);
@@ -31,18 +31,14 @@ public class EFInboxService<TContext> : IInboxService
             return true;
         }
 
-        if (eventLogEntry.State == InboxEventStateEnum.NotConsumed)
+        if (eventLogEntry.State == InboxEventState.NotConsumed && eventLogEntry.TimesConsumed < _options.RetryCount)
         {
-            if (eventLogEntry.TimesConsumed < _options.RetryCount)
-            {
-                eventLogEntry.State = InboxEventStateEnum.InProgress;
-                eventLogEntry.TimesConsumed++;
+            eventLogEntry.State = InboxEventState.InProgress;
+            eventLogEntry.TimesConsumed++;
 
-                await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
-                return true;
-            }
-
+            return true;
         }
 
         return false;
@@ -50,12 +46,12 @@ public class EFInboxService<TContext> : IInboxService
 
     public async Task<bool> SucceedAsync(Guid eventId, string handler)
     {
-        var eventLogEntry = _context.Set<InboxEventLogEntry>().Single(x => x.EventId == eventId && x.Handler == handler);
+        var eventLogEntry = await _context.Set<InboxEventLogEntry>().SingleAsync(x => x.EventId == eventId && x.Handler == handler);
 
-        if (eventLogEntry.State == InboxEventStateEnum.InProgress)
+        if (eventLogEntry.State == InboxEventState.InProgress)
         {
 
-            eventLogEntry.State = InboxEventStateEnum.Consumed;
+            eventLogEntry.State = InboxEventState.Consumed;
 
             await _context.SaveChangesAsync();
 
@@ -67,11 +63,11 @@ public class EFInboxService<TContext> : IInboxService
 
     public async Task<bool> FailAsync(Guid eventId, string handler)
     {
-        var eventLogEntry = _context.Set<InboxEventLogEntry>().Single(x => x.EventId == eventId && x.Handler == handler);
+        var eventLogEntry = await _context.Set<InboxEventLogEntry>().SingleAsync(x => x.EventId == eventId && x.Handler == handler);
 
-        if (eventLogEntry.State == InboxEventStateEnum.InProgress)
+        if (eventLogEntry.State == InboxEventState.InProgress)
         {
-            eventLogEntry.State = InboxEventStateEnum.NotConsumed;
+            eventLogEntry.State = InboxEventState.NotConsumed;
 
             await _context.SaveChangesAsync();
 
@@ -83,11 +79,11 @@ public class EFInboxService<TContext> : IInboxService
 
     public async Task<bool> ResetAsync(Guid eventId, string handler)
     {
-        var eventLogEntry = _context.Set<InboxEventLogEntry>().Single(x => x.EventId == eventId && x.Handler == handler);
+        var eventLogEntry = await _context.Set<InboxEventLogEntry>().SingleAsync(x => x.EventId == eventId && x.Handler == handler);
 
-        if (eventLogEntry.State == InboxEventStateEnum.ConsumeFailed)
+        if (eventLogEntry.State == InboxEventState.ConsumeFailed)
         {
-            eventLogEntry.State = InboxEventStateEnum.InProgress;
+            eventLogEntry.State = InboxEventState.InProgress;
             eventLogEntry.TimesConsumed = 0;
 
             await _context.SaveChangesAsync();
@@ -101,7 +97,7 @@ public class EFInboxService<TContext> : IInboxService
     public async Task<ICollection<InboxEventLogEntry>> GetFailedEvents(string handler)
     {
         return await _context.Set<InboxEventLogEntry>()
-            .Where(x => x.Handler == handler && x.State == InboxEventStateEnum.ConsumeFailed)
+            .Where(x => x.Handler == handler && x.State == InboxEventState.ConsumeFailed)
             .ToListAsync();
 
     }

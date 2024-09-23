@@ -3,6 +3,7 @@ using AnyProduct.EventBus.Abstractions;
 using AnyProduct.Products.Application.Commands;
 using AnyProduct.Products.Application.IntegrationEvents;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Products.Application.IntegrationEventHandlers;
 
@@ -15,7 +16,7 @@ public class OrderStartedIntergationEventHandler : IIntegrationEventHandler<Orde
         _mediator = mediator;
     }
 
-    public async Task Handle(OrderStartedIntegrationEvent @event)
+    public async Task Handle([NotNull] OrderStartedIntegrationEvent @event)
     {
         await _mediator.Send(new CheckAndReserveProductStockCommand() { OrderId = @event.OrderId, OrderStockItems = @event.OrderStockItems });
 

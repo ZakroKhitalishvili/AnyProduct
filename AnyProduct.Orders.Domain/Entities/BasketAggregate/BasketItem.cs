@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AnyProduct.Orders.Domain.Entities.Basket;
+namespace AnyProduct.Orders.Domain.Entities.BasketAggregate;
 
 public class BasketItem
 {

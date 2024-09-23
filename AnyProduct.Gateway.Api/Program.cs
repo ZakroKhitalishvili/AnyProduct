@@ -23,6 +23,7 @@ builder.Services.AddAuthentication(options =>
     {
         options.Audience = builder.Configuration["Jwt:Audience"];
         options.ClaimsIssuer = builder.Configuration["Jwt:Issuer"];
+#pragma warning disable CA5404 // Do not disable token validation checks
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -31,6 +32,7 @@ builder.Services.AddAuthentication(options =>
             ValidateLifetime = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!.ToString()))
         };
+#pragma warning restore CA5404 // Do not disable token validation checks
         options.Events = new JwtBearerEvents()
         {
             OnAuthenticationFailed = c =>
@@ -56,8 +58,6 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    //app.UseSwagger();
-    //app.UseSwaggerUI();
     app.UseSwaggerForOcelotUI(opt =>
     {
         opt.PathToSwaggerGenerator = "/swagger/docs";
@@ -68,4 +68,4 @@ app.UseHttpsRedirection();
 
 await app.UseOcelot();
 
-app.Run();
+await app.RunAsync();

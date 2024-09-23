@@ -3,14 +3,15 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using AnyProduct.OutBox.EF;
-using AnyProduct.Orders.Domain.Entities.Order;
-using AnyProduct.Orders.Domain.Entities.Buyer;
+using AnyProduct.Orders.Domain.Entities.OrderAggregate;
+using AnyProduct.Orders.Domain.Entities.BuyerAggregate;
 using AnyProduct.Orders.Infrastructure.EntityConfigurations;
 using AnyProduct.Orders.Domain.Entities;
 using AnyProduct.Orders.Application;
-using AnyProduct.Orders.Domain.Entities.Basket;
-using AnyProduct.Orders.Domain.Entities.Balance;
+using AnyProduct.Orders.Domain.Entities.BasketAggregate;
 using AnyProduct.Inbox.EF;
+using AnyProduct.Orders.Domain.Entities.PaymentAggregate;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Infrastructure;
 
@@ -32,7 +33,7 @@ public class OrderContext : DbContext
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating([NotNull] ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("orders");
         modelBuilder.ApplyConfiguration(new OrderEntityTypeConfiguration());
@@ -57,14 +58,15 @@ public class OrderContext : DbContext
     protected async Task DispatchDomainEventsAsync()
     {
         var domainEntities = ChangeTracker
-        .Entries<AggregateRoot>()
-        .Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any());
+            .Entries<AggregateRoot>()
+            .Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Count != 0)
+            .ToList();
 
         var domainEvents = domainEntities
             .SelectMany(x => x.Entity.DomainEvents)
             .ToList();
 
-        domainEntities.ToList()
+        domainEntities
             .ForEach(entity => entity.Entity.ClearEvents());
 
         foreach (var domainEvent in domainEvents)

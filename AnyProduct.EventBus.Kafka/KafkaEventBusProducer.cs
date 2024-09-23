@@ -1,5 +1,6 @@
 ﻿using AnyProduct.EventBus.Abstractions;
 using AnyProduct.EventBus.Events;
+using AnyProduct.EventBus.Kafka.Extensions;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -8,6 +9,7 @@ using OpenTelemetry.Context.Propagation;
 using Polly;
 using Polly.Retry;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -16,24 +18,23 @@ namespace AnyProduct.EventBus.Kafka;
 
 public sealed class KafkaEventBusProducer(
     ILogger<KafkaEventBusProducer> logger,
-    IServiceProvider serviceProvider,
     IProducer<string, string> producer,
     IOptions<EventBusOptions> options,
-    IOptions<EventBusSubscriptionInfo> subscriptionOptions,
     KafkaTelemetry kafkaTelemetry) : IEventBus, IDisposable
 {
+#pragma warning disable CA2213 // Disposable fields should be disposed
     private readonly ActivitySource _activitySource = kafkaTelemetry.ActivitySource;
+#pragma warning restore CA2213 // Disposable fields should be disposed
     private readonly TextMapPropagator _propagator = kafkaTelemetry.Propagator;
 
-    private readonly EventBusSubscriptionInfo _subscriptionInfo = subscriptionOptions.Value;
     private readonly ResiliencePipeline<DeliveryResult<string, string>> _pipeline = CreateResiliencePipeline(options.Value.RetryCount);
 
-    public async Task PublishAsync(IntegrationEvent @event)
+    public async Task PublishAsync([NotNull] IntegrationEvent @event)
     {
         var eventName = @event.GetType().Name;
         var body = SerializeMessage(@event);
 
-        var message = new Message<string, string> { Key = @event.PartitionKey, Value = body };
+        var message = new Message<string, string> { Key = @event.PartitionKey ?? "Default", Value = body };
 
         var activityName = $"{eventName} publish";
 
@@ -58,7 +59,7 @@ public sealed class KafkaEventBusProducer(
 
             _propagator.Inject(new PropagationContext(contextToInject, Baggage.Current), message, InjectTraceContextIntoMessage);
 
-            activity.SetActivityContext(@event.Type, "publish");
+            activity!.SetActivityContext(@event.Type, "publish");
 
             try
             {
@@ -77,7 +78,7 @@ public sealed class KafkaEventBusProducer(
             }
             catch (Exception ex)
             {
-                activity.SetExceptionTags(ex);
+                activity!.SetExceptionTags(ex);
 
                 throw;
             }
@@ -91,12 +92,12 @@ public sealed class KafkaEventBusProducer(
         producer?.Dispose();
     }
 
-    private string SerializeMessage(IntegrationEvent @event)
+    private static string SerializeMessage(IntegrationEvent @event)
     {
         return JsonSerializer.Serialize(@event, @event.GetType());
     }
 
-    private void InjectTraceContextIntoMessage(Message<string, string> message, string key, string value)
+    private static void InjectTraceContextIntoMessage(Message<string, string> message, string key, string value)
     {
         var header = new Headers();
         header.Add(key, Encoding.UTF8.GetBytes(value));

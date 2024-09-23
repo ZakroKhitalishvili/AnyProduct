@@ -3,6 +3,7 @@ using AnyProduct.Orders.Application.Dtos;
 using AnyProduct.Orders.Application.Services;
 using AnyProduct.Orders.Domain.Repositories;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AnyProduct.Orders.Application.Queries;
 
@@ -15,8 +16,8 @@ public class GetCustomerOrdersQuery : IRequest<PagedListDto<OrderDto>>
 
 public class GetCustomerOrdersQueryHandler : IRequestHandler<GetCustomerOrdersQuery, PagedListDto<OrderDto>>
 {
-    public readonly IOrderRepository _orderRepository;
-    public readonly ICurrentUserProvider _currentUserProvider;
+    private readonly IOrderRepository _orderRepository;
+    private readonly ICurrentUserProvider _currentUserProvider;
 
     public GetCustomerOrdersQueryHandler(IOrderRepository orderRepository, ICurrentUserProvider currentUserProvider)
     {
@@ -24,7 +25,7 @@ public class GetCustomerOrdersQueryHandler : IRequestHandler<GetCustomerOrdersQu
         _currentUserProvider = currentUserProvider;
     }
 
-    public async Task<PagedListDto<OrderDto>> Handle(GetCustomerOrdersQuery request, CancellationToken cancellationToken)
+    public Task<PagedListDto<OrderDto>> Handle([NotNull] GetCustomerOrdersQuery request, CancellationToken cancellationToken)
     {
         request.Page ??= 1;
         request.PageSize ??= 10;
@@ -44,6 +45,6 @@ public class GetCustomerOrdersQueryHandler : IRequestHandler<GetCustomerOrdersQu
             result.Items.Add(OrderDto.From(order));
         }
 
-        return result;
+        return Task.FromResult(result);
     }
 }

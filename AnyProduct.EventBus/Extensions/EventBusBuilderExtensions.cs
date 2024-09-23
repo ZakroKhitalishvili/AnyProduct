@@ -7,17 +7,17 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class EventBusBuilderExtensions
 {
-    public static IEventBusBuilder ConfigureJsonOptions(this IEventBusBuilder eventBusBuilder)
+    public static IEventBusBuilder ConfigureJsonOptions([NotNull] this IEventBusBuilder eventBusBuilder)
     {
         eventBusBuilder.Services.Configure<EventBusSubscriptionInfo>(o =>
         {
-            
+
         });
 
         return eventBusBuilder;
     }
 
-    public static IEventBusBuilder AddSubscription<T, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TH>(this IEventBusBuilder eventBusBuilder)
+    public static IEventBusBuilder AddSubscription<T, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TH>([NotNull] this IEventBusBuilder eventBusBuilder)
         where T : IntegrationEvent
         where TH : class, IIntegrationEventHandler<T>
     {

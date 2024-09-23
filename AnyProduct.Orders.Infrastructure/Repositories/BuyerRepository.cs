@@ -1,5 +1,5 @@
 ﻿
-using AnyProduct.Orders.Domain.Entities.Buyer;
+using AnyProduct.Orders.Domain.Entities.BuyerAggregate;
 using AnyProduct.Orders.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,9 +14,9 @@ public class BuyerRepository : IBuyerRepository
         _context = context;
     }
 
-    public Buyer Add(Buyer order)
+    public Buyer Add(Buyer buyer)
     {
-        return _context.Add(order).Entity;
+        return _context.Add(buyer).Entity;
     }
 
     public async Task<Buyer?> FindByCustomerIdAsync(string id)

@@ -1,6 +1,6 @@
 ﻿
 
-using AnyProduct.Orders.Domain.Entities.Buyer;
+using AnyProduct.Orders.Domain.Entities.BuyerAggregate;
 
 namespace AnyProduct.Orders.Application.Dtos;
 

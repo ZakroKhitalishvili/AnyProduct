@@ -1,0 +1,55 @@
+<Project>
+
+	<PropertyGroup>
+		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+		<CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+	</PropertyGroup>
+
+	<ItemGroup>
+
+		<!-- ASP.NET Core -->
+		<PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="8.0.5" />
+		<PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
+		<PackageVersion Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
+
+		<!-- Extensions -->
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.Options" Version="8.0.2" />
+		<PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+		<PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+
+		<!-- EF Core -->
+		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+		<PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8"/>
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8" />
+
+		<!-- Open Telementy -->
+		<PackageVersion Include="OpenTelemetry.Api" Version="1.9.0" />
+		<PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
+		<PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
+		<PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
+		<PackageVersion Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.12" />
+		<PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
+
+		<!-- Miscellaneous -->
+		<PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
+		<PackageVersion Include="Polly" Version="8.4.1" />
+		<PackageVersion Include="Confluent.Kafka" Version="2.5.2" />
+		<PackageVersion Include="MMLib.SwaggerForOcelot" Version="8.3.0" />
+		<PackageVersion Include="Ocelot" Version="23.3.3" />
+		<PackageVersion Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+		<PackageVersion Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
+		<PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
+		<PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.0.2" />
+		<PackageVersion Include="FluentValidation" Version="11.9.2" />
+		<PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.2" />
+		<PackageVersion Include="MediatR" Version="12.4.0" />
+
+		<!--Code Analysis -->
+		<PackageVersion Include="SonarAnalyzer.CSharp" Version="9.32.0.97167" />
+	</ItemGroup>
+
+</Project>

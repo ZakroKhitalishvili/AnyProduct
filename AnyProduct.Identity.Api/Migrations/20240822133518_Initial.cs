@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -236,7 +237,7 @@ namespace AnyProduct.Identity.Api.Migrations
         }
 
         /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
+        protected override void Down([NotNull] MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");

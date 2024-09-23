@@ -11,7 +11,7 @@ public class CurrentUserProvider(IHttpContextAccessor httpContextAccessor) : ICu
             var userIdClaim = _httpContextAccessor.HttpContext!.User.FindFirst(ClaimTypes.NameIdentifier);
             if(userIdClaim is null)
             {
-                throw new Exception("There no claim provided for User Id");
+                throw new InvalidOperationException("There no claim provided for User Id");
             }
 
             return userIdClaim.Value;
